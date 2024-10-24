@@ -1,0 +1,22 @@
+- Declaration Files
+	- Purpose
+		- To provide type information for untyped JS code
+			- Why its useful -> [[Type Safety]]
+		- Allows you to publish typing information without publishing TS source code
+		- [[Separation of Concerns]]. Helps split code up into [[Declaration File]] and [[Definition File]]
+	- Features
+		- Declaring what the export types are
+			- Allows you to type someone else's untyped modules
+		- **Declaration Combinations**: Can export and merge declarations with the **same name** of the **same or different kind** (*value, type or namespace*)
+			- If they are **different**, then there is **no conflict** as you can determine which is which based on context/use
+			- If they are the **same**, then the declaration may get **merged** ([[Declaration Merging]])
+	- Generation:
+		- Automatically as an output of the `tsc --declaration` command.
+		- Manually:
+			- Declaration file with the same name, or all inside a `index.d.ts`
+- Consuming Declaration Files
+	- Depends on how the library (i.e. the *set of definitions*) is to be consumed, i.e. the [[Javascript Module System]]
+		- Are multiple objects being exported or just a single (like a class or function)? If the later, use a particular template to ensure it works across different module systems.
+	- Typescript has a search algorithm for fetching the necessary declarations:
+		- Looks in `types/`  or wherever you have specified the `typeRoots` to be
+		- By default, will load *all type declarations* found in that folder.

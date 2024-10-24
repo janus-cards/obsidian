@@ -1,0 +1,6 @@
+- Module Resolution in Browsers:
+	- A module imports another with a relative import
+	- Take the URL of that module:
+		- If its imported in a script element in an html component than the url is the base url of the html file received
+		- If it is a fetched module than its URL is whatever was used to fetch it
+	- Then treat the module specifier relative to that URL to construct the final URL that you call.

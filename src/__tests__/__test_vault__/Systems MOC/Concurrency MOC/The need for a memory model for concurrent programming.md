@@ -1,0 +1,1 @@
+A [[Memory Model]] is essential for achieving the [[Goals of Concurrent Programming]] because it states the consequences of programs on data/memory and hence determines if it will satisfy the [[Consistency Model]].

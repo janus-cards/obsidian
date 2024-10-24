@@ -8,6 +8,7 @@
 		"allowJs": true,
 		"noImplicitAny": true,
 		"moduleResolution": "node",
+		"esModuleInterop": true,
 		"importHelpers": true,
 		"isolatedModules": true,
 		"strictNullChecks": true,
@@ -17,7 +18,15 @@
 			"ES6",
 			"ES7"
 		],
-		"outDir": "dist"
+		"outDir": "dist",
+		"paths": {
+			"@types/*": [
+				"src/@types/*"
+			],
+			"@/*": [
+				"src/*"
+			]
+		}
 	},
 	"include": [
 		"**/*.ts"

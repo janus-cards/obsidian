@@ -1,0 +1,1 @@
+- The Store of a program is the current state of the memory (namely addresses to values).

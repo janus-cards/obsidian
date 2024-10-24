@@ -1,0 +1,32 @@
+---
+type: note
+created: Saturday 19 Oct 2024
+tags: 
+---
+- Purpose
+	- To process [[Sequential Data]]
+		- Ordered set of elements
+		- Representation of elements:
+			- For Language:
+				- [[One Hot Encoding]]
+				- [[Word Embedding]]
+- Important architectural considerations:
+	- [[Parameter Sharing]]
+		- **Problem**: For variable length inputs (sequential or pictoral), **we don't want the number of parameters required to grow too.**
+			- It becomes totally impractical as the sequences grow very long
+			- Increased dimensionality requires more data to be trained on ([[Curse of Dimensionality]])
+		- **Solution**: Observation that certain properties are **invariant** under certain transformation, and hence the same parameters may be reused.
+			- For example, the word 'Nepal' means the same thing (more or less) independant of where it is in the a sentence. Hence it is **position invariant**
+		- **Benefits**:
+			- Lower dimensionality
+			- Simpler and often factorised descriptions of behaviour (like a [[Recurrence Relation]])
+	- **Feeding of previous outputs back into the same model**
+		- This is the recurrence property
+- Sibling approaches:
+	- [[Time Delayed Neural Networks]]:
+		- Convolution in 1D space. Gives you a sequence at the end where each element includes information about its neighbours.
+- [[Unfolding Computational Graph]]
+- Role of the [[Hidden State]]
+	- [[Lossy]] summary of past sequence. Has to be lossy because fixed data cannot be used to store an arbitrary amount of information (that could arise from summarizing an arbitrarily long sequence.)
+		- How can you stuff as much information into the fixed sized vector?
+		- [[Compression Problem]]
