@@ -32,7 +32,7 @@ describe("when we create an event watcher", () => {
 		expect(watcher.onCreate.mock.calls.length).toEqual(589);
 	});
 
-	describe("and when there are modifications", () => {
+	describe("and if there are changes to files", () => {
 		beforeEach(async () => {
 			await app.load();
 			watcher.onCreate.mockClear();
@@ -58,6 +58,17 @@ describe("when we create an event watcher", () => {
 			expect(watcher.onRename.mock.calls.length).toEqual(0);
 			expect(watcher.onCreate.mock.calls.length).toEqual(0);
 			expect(await app.vault.exists(path)).toEqual(false);
+		});
+
+		test("should see modifications", async () => {
+			const path = new TFile("Algorithms MOC/Bit Manipulation Tricks.md");
+			await app.vault.modify(path, "Updated content");
+			expect(watcher.onModify.mock.calls.length).toEqual(1);
+			expect(watcher.onDelete.mock.calls.length).toEqual(0);
+			expect(watcher.onRename.mock.calls.length).toEqual(0);
+			expect(watcher.onCreate.mock.calls.length).toEqual(0);
+			expect(await app.vault.exists(path.path)).toEqual(true);
+			expect(await app.vault.read(path)).toEqual("Updated content");
 		});
 
 		test("should see creations", async () => {

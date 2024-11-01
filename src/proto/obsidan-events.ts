@@ -244,12 +244,16 @@ export class CreateEvent extends pb_1.Message {
     #one_of_decls: number[][] = [];
     constructor(data?: any[] | {
         filePath?: string;
+        content?: string;
     }) {
         super();
         pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
         if (!Array.isArray(data) && typeof data == "object") {
             if ("filePath" in data && data.filePath != undefined) {
                 this.filePath = data.filePath;
+            }
+            if ("content" in data && data.content != undefined) {
+                this.content = data.content;
             }
         }
     }
@@ -259,21 +263,35 @@ export class CreateEvent extends pb_1.Message {
     set filePath(value: string) {
         pb_1.Message.setField(this, 1, value);
     }
+    get content() {
+        return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+    }
+    set content(value: string) {
+        pb_1.Message.setField(this, 2, value);
+    }
     static fromObject(data: {
         filePath?: string;
+        content?: string;
     }): CreateEvent {
         const message = new CreateEvent({});
         if (data.filePath != null) {
             message.filePath = data.filePath;
+        }
+        if (data.content != null) {
+            message.content = data.content;
         }
         return message;
     }
     toObject() {
         const data: {
             filePath?: string;
+            content?: string;
         } = {};
         if (this.filePath != null) {
             data.filePath = this.filePath;
+        }
+        if (this.content != null) {
+            data.content = this.content;
         }
         return data;
     }
@@ -283,6 +301,8 @@ export class CreateEvent extends pb_1.Message {
         const writer = w || new pb_1.BinaryWriter();
         if (this.filePath.length)
             writer.writeString(1, this.filePath);
+        if (this.content.length)
+            writer.writeString(2, this.content);
         if (!w)
             return writer.getResultBuffer();
     }
@@ -294,6 +314,9 @@ export class CreateEvent extends pb_1.Message {
             switch (reader.getFieldNumber()) {
                 case 1:
                     message.filePath = reader.readString();
+                    break;
+                case 2:
+                    message.content = reader.readString();
                     break;
                 default: reader.skipField();
             }

@@ -29,11 +29,11 @@ export default abstract class EventWatcher {
 		// Cannot create a property initialized to this because the derived class is
 		// not yet initialized at the time that this class i
 		return {
-			create: this.onCreate,
-			delete: this.onDelete,
-			rename: this.onRename,
-			modify: this.onModify,
-			file_open: this.onFileOpen,
+			create: this.onCreate.bind(this),
+			delete: this.onDelete.bind(this),
+			rename: this.onRename.bind(this),
+			modify: this.onModify.bind(this),
+			file_open: this.onFileOpen.bind(this),
 		};
 	}
 

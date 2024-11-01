@@ -52,10 +52,19 @@ export class Vault {
 
 	async rename(file: TFile, newPath: string) {
 		await this.fileStore.renameFile(file.path, newPath);
-		this.eventManager.signalEvent("rename", file, file.path);
+		this.eventManager.signalEvent("rename", new TFile(newPath), file.path);
 	}
 
 	async exists(path: string) {
 		return this.fileStore.fileExists(path);
+	}
+
+	async read(file: TFile): Promise<string> {
+		return this.fileStore.readFile(file.path);
+	}
+
+	async modify(file: TFile, data: string) {
+		await this.fileStore.modifyFile(file.path, data);
+		this.eventManager.signalEvent("modify", file);
 	}
 }

@@ -616,7 +616,8 @@ proto.CreateEvent.prototype.toObject = function(opt_includeInstance) {
  */
 proto.CreateEvent.toObject = function(includeInstance, msg) {
   var f, obj = {
-    filepath: jspb.Message.getFieldWithDefault(msg, 1, "")
+    filepath: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    content: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
@@ -657,6 +658,10 @@ proto.CreateEvent.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.setFilepath(value);
       break;
+    case 2:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setContent(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -693,6 +698,13 @@ proto.CreateEvent.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getContent();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
 };
 
 
@@ -711,6 +723,24 @@ proto.CreateEvent.prototype.getFilepath = function() {
  */
 proto.CreateEvent.prototype.setFilepath = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string content = 2;
+ * @return {string}
+ */
+proto.CreateEvent.prototype.getContent = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.CreateEvent} returns this
+ */
+proto.CreateEvent.prototype.setContent = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
