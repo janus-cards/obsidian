@@ -21,27 +21,27 @@ export default abstract class EventWatcher {
 			this.plugin.app.workspace.on("file-open", callback),
 	};
 
-	private eventHandlerOverloads: EventCallbackMap = {
-		create: this.onCreate,
-		delete: this.onDelete,
-		rename: this.onRename,
-		modify: this.onModify,
-		file_open: this.onFileOpen,
-	};
-
 	constructor(plugin: Plugin) {
 		this.plugin = plugin;
-
-		this.registerAllEvents();
 	}
 
-	private registerAllEvents() {
-		for (const eventName in this.eventHandlerOverloads) {
+	private getOverloads(): EventCallbackMap {
+		// Cannot create a property initialized to this because the derived class is
+		// not yet initialized at the time that this class i
+		return {
+			create: this.onCreate,
+			delete: this.onDelete,
+			rename: this.onRename,
+			modify: this.onModify,
+			file_open: this.onFileOpen,
+		};
+	}
+
+	public watchEvents() {
+		const overloads = this.getOverloads();
+		for (const eventName in overloads) {
 			const eventType = eventName as EventName;
-			this.registerEvent(
-				eventType,
-				this.eventHandlerOverloads[eventType]
-			);
+			this.registerEvent(eventType, overloads[eventType]);
 		}
 	}
 

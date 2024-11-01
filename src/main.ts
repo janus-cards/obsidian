@@ -1,6 +1,6 @@
 import { Plugin } from "obsidian";
-import EventLogger from "./event-logger";
-import { EventGrpcProxy } from "./event-grpc-proxy";
+import EventLogger from "./event-snooping/event-logger";
+import { EventGrpcProxy } from "./event-snooping/event-grpc-proxy";
 import { ChannelCredentials } from "@grpc/grpc-js";
 
 export default class JanusIntegration extends Plugin {

@@ -1,6 +1,7 @@
 import fs from "fs";
-
+import glob from "glob";
 class FileState {
+	path: string;
 	data: string | null;
 
 	constructor(data: string | null) {
@@ -22,6 +23,7 @@ type ExistRule = "must-exist" | "must-not-exist" | "ignore";
 /*
 A simple in-memory file store that can be used to simulate a vault.
 All manipulations to the file are transactional.
+Should initially look exactly like the underlying file system.
 */
 export class InMemoryFileStore {
 	files: Map<string, FileState> = new Map();
@@ -31,16 +33,34 @@ export class InMemoryFileStore {
 		this.vault_path = vault_path;
 	}
 
+	async fileExists(path: string): Promise<boolean> {
+		await this.ensureFileLoaded(path);
+		return this.files.get(path)!.exists();
+	}
+
+	async getAllFiles(): Promise<string[]> {
+		// Get all files in memory
+		const inMemoryFiles = Array.from(this.files.keys());
+		// Get all files in the vault recursively that are markdown files
+		const diskFiles = glob.sync(this.vault_path + "/**/*.md", {
+			absolute: true,
+		});
+		const allFiles = [...inMemoryFiles, ...diskFiles].map((path) =>
+			path.replace(new RegExp(`^.*${this.vault_path}/`), "")
+		);
+		return allFiles;
+	}
+
 	async createFile(path: string, data: string): Promise<void> {
-		this.setFile(path, data, "must-not-exist");
+		await this.setFile(path, data, "must-not-exist");
 	}
 
 	async modifyFile(path: string, data: string): Promise<void> {
-		this.setFile(path, data, "must-exist");
+		await this.setFile(path, data, "must-exist");
 	}
 
 	async deleteFile(path: string): Promise<void> {
-		this.setFile(path, null, "must-exist");
+		await this.setFile(path, null, "must-exist");
 	}
 
 	async renameFile(oldPath: string, newPath: string): Promise<void> {
@@ -53,7 +73,7 @@ export class InMemoryFileStore {
 	}
 
 	async readFile(path: string): Promise<string> {
-		this.ensureFileLoaded(path);
+		await this.ensureFileLoaded(path);
 		const state = this.files.get(path);
 		if (!state || !state.exists()) {
 			throw new Error(`File ${path} does not exist`);

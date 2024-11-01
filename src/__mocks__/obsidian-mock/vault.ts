@@ -1,4 +1,4 @@
-import { EventManager } from "./events";
+import { EventManager, EventRef } from "./events";
 import { InMemoryFileStore } from "./file-store";
 import { TFile } from "./files";
 
@@ -11,22 +11,31 @@ A Vault that loads files from a folder into memory and then manipulates them wit
 Lazily loads files so assumes the files do not change during the test.
 */
 export class Vault {
-	eventManager: EventManager;
+	private eventManager: EventManager;
 
-	fileStore: InMemoryFileStore;
+	private fileStore: InMemoryFileStore;
 
 	constructor(eventManager: EventManager, config: VaultConfig) {
 		this.eventManager = eventManager;
 		this.fileStore = new InMemoryFileStore(config.folder);
 	}
 
-	on<E extends EventName>(name: E, callback: EventCallback[E]) {
-		return this.eventManager.addListener({ eventName: name, callback });
+	async load() {
+		await this.openVault();
 	}
 
-	/*
-	A decorator that ensures any touched file is loaded into memory.
-	*/
+	async openVault() {
+		// Obsidian gets all the files in the vault and "creates" them
+		const files = await this.fileStore.getAllFiles();
+		const filesAsTFiles = files.map((file) => new TFile(file));
+		for (const file of filesAsTFiles) {
+			this.eventManager.signalEvent("create", file);
+		}
+	}
+
+	on<E extends EventName>(name: E, callback: EventCallback[E]): EventRef<E> {
+		return { eventName: name, callback };
+	}
 
 	async create(path: string, data: string): Promise<TFile> {
 		await this.fileStore.createFile(path, data);
@@ -44,5 +53,9 @@ export class Vault {
 	async rename(file: TFile, newPath: string) {
 		await this.fileStore.renameFile(file.path, newPath);
 		this.eventManager.signalEvent("rename", file, file.path);
+	}
+
+	async exists(path: string) {
+		return this.fileStore.fileExists(path);
 	}
 }

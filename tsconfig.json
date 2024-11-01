@@ -25,6 +25,9 @@
 			],
 			"@/*": [
 				"src/*"
+			],
+			"obsidian-mock": [
+				"src/__mocks__/obsidian"
 			]
 		}
 	},

@@ -10,10 +10,14 @@ module.exports = {
 		"^.+\\.tsx?$": [
 			"ts-jest",
 			{
+				useESM: true,
 				tsconfig: "tsconfig.json",
+				diagnostics: false,
 			},
 		],
 	},
-	testMatch: ["**/__tests__/**/*.test.ts"],
+	testMatch: ["**/__tests__/**/*.test.(ts|js)"],
 	moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+	extensionsToTreatAsEsm: [".ts"],
+	automock: false,
 };
