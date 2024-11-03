@@ -10,10 +10,13 @@ import {
 	ObsidianEvent,
 } from "@/proto/obsidan-events";
 import { ChannelCredentials, ClientWritableStream } from "@grpc/grpc-js";
+import { ConnectivityState } from "@grpc/grpc-js/build/src/connectivity-state";
 
 type GrpcConfig = {
 	address: string;
 	credentials: ChannelCredentials;
+	verbose: boolean;
+	reconnectDelayMs: number;
 };
 
 /*
@@ -27,13 +30,18 @@ type EventNameToProtoMap = {
 	file_open: FileOpenEvent;
 };
 
+type ConnectionState = "Unconnected" | "Connecting" | "Connected";
+
 export class EventGrpcProxy extends EventWatcher {
 	private client: ObsidianEventStreamClient;
 	private stream: ClientWritableStream<ObsidianEvent>;
+	private connectionState: ConnectionState = "Unconnected";
+	private grpcConfig: GrpcConfig;
 
-	constructor(plugin: Plugin, grpc_config: GrpcConfig) {
+	constructor(plugin: Plugin, grpcConfig: GrpcConfig) {
 		super(plugin);
-		this.initEventStream(grpc_config);
+		this.grpcConfig = grpcConfig;
+		this.connectEventStream();
 	}
 
 	close() {
@@ -45,17 +53,24 @@ export class EventGrpcProxy extends EventWatcher {
 		}
 	}
 
-	private initEventStream(grpc_config: GrpcConfig) {
+	private connectEventStream() {
 		this.client = new ObsidianEventStreamClient(
-			grpc_config.address,
-			grpc_config.credentials
+			this.grpcConfig.address,
+			this.grpcConfig.credentials
 		);
 
-		this.stream = this.client.streamEvents((err, value) => {
+		const handler = (err: Error | null) => {
 			if (err) {
-				console.error(err);
+				this.retryConnection();
 			}
-		});
+		};
+		this.stream = this.client.streamEvents(handler.bind(this));
+	}
+
+	private retryConnection() {
+		setTimeout(() => {
+			this.connectEventStream();
+		}, this.grpcConfig.reconnectDelayMs);
 	}
 
 	private sendRequest<Name extends EventName>(
@@ -99,6 +114,20 @@ export class EventGrpcProxy extends EventWatcher {
 		if (file) {
 			const event = new FileOpenEvent({ filePath: file.path });
 			this.sendRequest("file_open", event);
+		}
+	}
+
+	// Add getter for connection state
+	getConnectionState(): ConnectionState {
+		switch (this.client.getChannel().getConnectivityState(false)) {
+			case ConnectivityState.IDLE:
+				return "Unconnected";
+			case ConnectivityState.CONNECTING:
+				return "Connecting";
+			case ConnectivityState.READY:
+				return "Connected";
+			default:
+				return "Unconnected";
 		}
 	}
 }

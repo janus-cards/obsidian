@@ -10,7 +10,7 @@ export type ReceivedEvent = {
 	timestamp: number;
 };
 
-export class ObsidianEventStreamServer extends UnimplementedObsidianEventStreamService {
+export class ObsidianEventStreamService extends UnimplementedObsidianEventStreamService {
 	// The generated proto code has an index signature that prevents us from
 	// adding a private field, so we have to use a different name.
 	#userCallback: (event: ReceivedEvent) => void;
@@ -56,7 +56,7 @@ export function startServer(
 	const server = new grpc.Server();
 	server.addService(
 		UnimplementedObsidianEventStreamService.definition,
-		new ObsidianEventStreamServer(callback)
+		new ObsidianEventStreamService(callback)
 	);
 
 	const serverReady = new Promise<grpc.Server>((resolve, reject) => {

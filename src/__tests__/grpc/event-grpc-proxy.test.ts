@@ -9,9 +9,9 @@ import {
 } from "@jest/globals";
 
 jest.mock("obsidian");
-
+import * as grpc from "@grpc/grpc-js";
 import {
-	ObsidianEventStreamServer,
+	ObsidianEventStreamService,
 	ReceivedEvent,
 	startServer,
 } from "../../proto/grpc-test-server";
@@ -23,7 +23,7 @@ import getTestApp from "../utilities/get-test-vault";
 import { TFile } from "@/__mocks__/obsidian-mock/files";
 
 describe("gRPC Server Tests", () => {
-	let server: ObsidianEventStreamServer;
+	let server: grpc.Server;
 	let client: EventGrpcProxy;
 	let app: App;
 	let plugin: Plugin;
@@ -38,6 +38,8 @@ describe("gRPC Server Tests", () => {
 		client = new EventGrpcProxy(plugin, {
 			address: `127.0.0.1:${randomPort}`,
 			credentials: ChannelCredentials.createInsecure(),
+			verbose: false,
+			reconnectDelayMs: 3000,
 		});
 		client.watchEvents();
 		await new Promise((resolve) => setTimeout(resolve, 500));
@@ -110,6 +112,71 @@ describe("gRPC Server Tests", () => {
 			file.path
 		);
 		expect(await app.vault.exists(file.path)).toEqual(false);
+	});
+});
+
+describe("EventGrpcProxy Tests", () => {
+	let client: EventGrpcProxy;
+	let server: grpc.Server;
+	let plugin: Plugin;
+
+	beforeAll(async () => {
+		const app = getTestApp();
+		plugin = new Plugin(app);
+	});
+
+	test("should handle connection failure and auto-reconnect", async () => {
+		const reconnectDelayMs = 500;
+		const port = Math.floor(Math.random() * 10000) + 5000;
+
+		// Create client before server exists
+		client = new EventGrpcProxy(plugin, {
+			address: `127.0.0.1:${port}`,
+			credentials: ChannelCredentials.createInsecure(),
+			verbose: false,
+			reconnectDelayMs,
+		});
+		client.watchEvents();
+
+		// Should start in Connecting state
+		expect(client.getConnectionState()).toBe("Connecting");
+
+		// Wait a bit to ensure connection attempt fails
+		await new Promise((resolve) => setTimeout(resolve, 500));
+
+		// Should be in Unconnected state after failure
+		expect(client.getConnectionState()).toBe("Unconnected");
+
+		// Start the server
+		server = await startServer(port, (event) => {
+			console.log("Received event", event);
+		});
+
+		// Wait for auto-reconnect (should be just over reconnectDelayMs)
+		await new Promise((resolve) =>
+			setTimeout(resolve, reconnectDelayMs + 500)
+		);
+
+		// Should now be connected
+		expect(client.getConnectionState()).toBe("Connected");
+
+		// Stop the server and wait for the client to fail reconnecting.
+		server.forceShutdown();
+		await new Promise((resolve) =>
+			setTimeout(resolve, reconnectDelayMs + 500)
+		);
+		expect(client.getConnectionState()).toBe("Unconnected");
+
+		// Start the server again
+		server = await startServer(port, (event) => {
+			console.log("Received event", event);
+		});
+
+		// Wait for auto-reconnect (should be just over reconnectDelayMs)
+		await new Promise((resolve) =>
+			setTimeout(resolve, reconnectDelayMs + 500)
+		);
+		expect(client.getConnectionState()).toBe("Connected");
 	});
 
 	// Add more tests for other event types...
