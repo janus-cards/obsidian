@@ -12,7 +12,7 @@ export class App {
 	constructor(folder: string) {
 		this.eventManager = new EventManager();
 		this.vault = new Vault(this.eventManager, { folder });
-		this.workspace = new Workspace();
+		this.workspace = new Workspace(this.eventManager);
 	}
 
 	createPlugin() {

@@ -7,7 +7,7 @@ type MockedEventCallbacks = {
 	delete: (file: TAbstractFile) => void;
 	rename: (file: TAbstractFile, oldPath: string) => void;
 	modify: (file: TAbstractFile) => void;
-	file_open: (file: TAbstractFile | null) => void;
+	"file-open": (file: TAbstractFile | null) => void;
 };
 
 // Unlike the real Obsidian API, this is typed with a discriminated union

@@ -11,6 +11,7 @@ import {
 } from "@/proto/obsidan-events";
 import { ChannelCredentials, ClientWritableStream } from "@grpc/grpc-js";
 import { ConnectivityState } from "@grpc/grpc-js/build/src/connectivity-state";
+import { CamelCase, KebabCase } from "@/include/strings/case-conversion";
 
 type GrpcConfig = {
 	address: string;
@@ -27,7 +28,7 @@ type EventNameToProtoMap = {
 	delete: DeleteEvent;
 	rename: RenameEvent;
 	modify: ModifyEvent;
-	file_open: FileOpenEvent;
+	"file-open": FileOpenEvent;
 };
 
 type ConnectionState = "Unconnected" | "Connecting" | "Connected";
@@ -80,7 +81,16 @@ export class EventGrpcProxy extends EventWatcher {
 		// Get timestamp
 		const timestamp = Date.now();
 		// Create request
-		const obsidianEvent = new ObsidianEvent({ timestamp, [name]: event });
+		// Names which are multiple words need to be camelCase in the proto
+		const protoName = CamelCase.style(KebabCase.unstyle(name));
+		const obsidianEvent = new ObsidianEvent({
+			timestamp,
+			[protoName]: event,
+		});
+		// Log event
+		if (this.grpcConfig.verbose) {
+			console.log("Sending event", obsidianEvent);
+		}
 		// Send request
 		this.stream.write(obsidianEvent);
 	}
@@ -113,7 +123,7 @@ export class EventGrpcProxy extends EventWatcher {
 		// I believe null file means it has been closed but not sure.
 		if (file) {
 			const event = new FileOpenEvent({ filePath: file.path });
-			this.sendRequest("file_open", event);
+			this.sendRequest("file-open", event);
 		}
 	}
 

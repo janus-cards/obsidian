@@ -38,7 +38,7 @@ describe("gRPC Server Tests", () => {
 		client = new EventGrpcProxy(plugin, {
 			address: `127.0.0.1:${randomPort}`,
 			credentials: ChannelCredentials.createInsecure(),
-			verbose: false,
+			verbose: true,
 			reconnectDelayMs: 3000,
 		});
 		client.watchEvents();
@@ -112,6 +112,20 @@ describe("gRPC Server Tests", () => {
 			file.path
 		);
 		expect(await app.vault.exists(file.path)).toEqual(false);
+	});
+
+	test("should handle file open events", async () => {
+		const file = new TFile("Algorithms MOC/XOR Switch.md");
+		app.workspace.getLeaf("split", "left").openFile(file);
+
+		// Wait for the event to be sent
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
+		expect(onEvent.mock.calls.length).toEqual(1);
+		const protoEvent = onEvent.mock.calls[0][0].event;
+		const protoName = protoEvent.event;
+		expect(protoName).toEqual("fileOpen");
+		expect(protoEvent[protoName].filePath).toEqual(file.path);
 	});
 });
 

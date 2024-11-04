@@ -1,4 +1,4 @@
-import { Plugin } from "obsidian";
+import { Plugin, TFile } from "obsidian";
 import { EventGrpcProxy } from "./event-snooping/event-grpc-proxy";
 import { ChannelCredentials } from "@grpc/grpc-js";
 
@@ -17,6 +17,13 @@ export default class JanusIntegration extends Plugin {
 			reconnectDelayMs: 3000,
 		});
 		this.grpcProxy.watchEvents();
+
+		// Test
+		const file = this.app.vault.getAbstractFileByPath("Welcome.md");
+		if (file) {
+			const leaf = this.app.workspace.getLeaf("split");
+			leaf.openFile(file as TFile);
+		}
 	}
 
 	onunload() {

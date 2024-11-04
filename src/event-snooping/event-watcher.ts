@@ -17,7 +17,7 @@ export default abstract class EventWatcher {
 		delete: (callback) => this.plugin.app.vault.on("delete", callback),
 		rename: (callback) => this.plugin.app.vault.on("rename", callback),
 		modify: (callback) => this.plugin.app.vault.on("modify", callback),
-		file_open: (callback) =>
+		"file-open": (callback) =>
 			this.plugin.app.workspace.on("file-open", callback),
 	};
 
@@ -33,7 +33,7 @@ export default abstract class EventWatcher {
 			delete: this.onDelete.bind(this),
 			rename: this.onRename.bind(this),
 			modify: this.onModify.bind(this),
-			file_open: this.onFileOpen.bind(this),
+			"file-open": this.onFileOpen.bind(this),
 		};
 	}
 
@@ -49,9 +49,8 @@ export default abstract class EventWatcher {
 		eventType: E,
 		callback: EventCallback[E]
 	): void {
-		this.plugin.registerEvent(
-			this.eventCreationOverloads[eventType](callback)
-		);
+		const eventRef = this.eventCreationOverloads[eventType](callback);
+		this.plugin.registerEvent(eventRef);
 	}
 
 	// Customization points
