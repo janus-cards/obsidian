@@ -1,7 +1,7 @@
 {
 	"id": "janus-integration",
 	"name": "Janus Integration",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"minAppVersion": "0.15.0",
 	"description": "Obsidian Connector for Janus",
 	"author": "Janus",
