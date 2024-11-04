@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+// Base message wrapper for all events
+message ObsidianEvent {
+  int64 timestamp = 1;  // Unix timestamp in milliseconds
+  oneof event {
+    CreateEvent create = 2;
+    DeleteEvent delete = 3;
+    RenameEvent rename = 4;
+    ModifyEvent modify = 5;
+    FileOpenEvent fileOpen = 6;
+  }
+}
+
+// Event when a file is created
+message CreateEvent {
+  string filePath = 1;
+}
+
+// Event when a file is deleted
+message DeleteEvent {
+  string filePath = 1;
+}
+
+// Event when a file is renamed
+message RenameEvent {
+  string newPath = 1;
+  string oldPath = 2;
+}
+
+// Event when a file is modified
+message ModifyEvent {
+  string filePath = 1;
+}
+
+// Event when a file is opened
+message FileOpenEvent {
+  string filePath = 1;
+}
+
+// Service definition for streaming events
+service ObsidianEventStream {
+  // Stream events from the client to the server
+  rpc streamEvents(stream ObsidianEvent) returns (Empty) {}
+}
+
+// Empty message for the streaming response
+message Empty {}

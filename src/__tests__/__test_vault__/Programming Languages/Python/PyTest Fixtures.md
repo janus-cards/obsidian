@@ -1,0 +1,25 @@
+- In [[PyTest]]:
+		- **Requesting Model**
+			- At a basic level, test functions **request** fixtures they require by declaring them as arguments.
+			- When pytest goes to run a test, it looks at the parameters in that test function’s signature, and then searches for fixtures that have the same names as those parameters. Once pytest finds them, it runs those fixtures, captures what they returned (if anything), and passes those objects into the test function as arguments.
+		- Properties:
+			- *Can be requested more than once, with subsequent requests being cached*
+				- Fixtures can also be **requested** more than once during the same test, and pytest won’t execute them again for that test. This means we can **request** fixtures in multiple fixtures that are dependent on them (and even again in the test itself) without those fixtures being executed more than once.
+			- *Scope mechanism for reusing a fixture multiple times (say for all functions in a class)*
+				- Use Case: If the 'arrange' step is really expensive (like setting up a connection), we may just want to reuse that connection each time
+				- What gets reused is what is returned by the fixture (representing the 'initial state'). If it is reused, then that state may be modified across tests within the scope of the fixture, so *it is bad practise to modify shared fixture state*
+				- Scopes:
+					-  `function`: the default scope, the fixture is destroyed at the end of the test.
+					- `class`: the fixture is destroyed during teardown of the last test in the class.
+					- `module`: the fixture is destroyed during teardown of the last test in the module.
+					- `package`: the fixture is destroyed during teardown of the last test in the package where the fixture is defined, including sub-packages and sub-directories within it.
+					- `session`: the fixture is destroyed at the end of the test sessiona
+			- Order is not guaranteed based on source-code order, but the dependency relation does specify a [[Happens Before Relation]].
+			- *Finalization/Teardown mechanism*
+				- Use of `yield` (turns it into a [[Python Generator]])
+				- Won't get executed if there is an uncaught exception *in the setup* (fine if its in the test itself), so consider using the `addFinalizer` method or wrap everything in a `try,finally` block
+				- *Or* make each fixture only take care of one resource (The *Safe Fixture Structure*):
+					- Why does this work?
+					- When a setup call fails on one fixture, there is no resource to remove so no teardown needs to be done. 
+					- And then for other fixtures, either they haven't run their setup yet so nothing to teardown 
+					- Or if they have then they also would have **reached the yield point and so their teardown is guaranteed to run**

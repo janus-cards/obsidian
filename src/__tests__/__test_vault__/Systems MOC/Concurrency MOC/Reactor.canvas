@@ -1,0 +1,30 @@
+{
+	"nodes":[
+		{"type":"text","text":"Handle Set","id":"a8a30e31ab80c8fe","x":-775,"y":-555,"width":173,"height":50},
+		{"type":"text","text":"Handle","id":"ffe2e7e2ae2094dc","x":-880,"y":-240,"width":140,"height":51},
+		{"type":"text","text":"Reactor","id":"622bb18180f95397","x":-836,"y":-842,"width":168,"height":60},
+		{"type":"file","file":"🌳 Forest/100 STEM MOC/110 Computer Science MOC/Operating System MOC/Handle (OS).md","id":"e90696cc7021ffcd","x":-1149,"y":-21,"width":400,"height":400},
+		{"type":"file","file":"🌳 Forest/100 STEM MOC/110 Computer Science MOC/Systems MOC/Concurrency MOC/Handle Set.md","id":"d1fee45553fae9da","x":-562,"y":-305,"width":501,"height":172},
+		{"type":"text","text":"### Event Handler\nThis is expressed through a common interface definition which can be implemented by the user through their own **Concrete Event Handler**","id":"04d9a7e1c93f465e","x":-1296,"y":-615,"width":381,"height":191},
+		{"type":"file","file":"🌳 Forest/100 STEM MOC/110 Computer Science MOC/Systems MOC/Concurrency MOC/Event Handler.md","id":"df25564ee6bc407c","x":-1837,"y":-630,"width":497,"height":411},
+		{"type":"text","text":"Demultiplexer","id":"4e340af0bef40c0a","x":-498,"y":-782,"width":250,"height":60},
+		{"type":"file","file":"🌳 Forest/100 STEM MOC/110 Computer Science MOC/Systems MOC/Concurrency MOC/Reactor.md","id":"c04c35841adb2287","x":-1580,"y":-2074,"width":631,"height":1262},
+		{"type":"file","file":"🌳 Forest/100 STEM MOC/110 Computer Science MOC/Systems MOC/Concurrency MOC/Reactor Dynamics.md","id":"a32b5909f4a34ed2","x":-2758,"y":-2029,"width":921,"height":1172},
+		{"type":"file","file":"🌳 Forest/100 STEM MOC/110 Computer Science MOC/Networking and Communication MOC/Demultiplexer.md","id":"753d96303760215c","x":-136,"y":-955,"width":400,"height":227}
+	],
+	"edges":[
+		{"id":"9cbb89abce535b99","fromNode":"a8a30e31ab80c8fe","fromSide":"bottom","toNode":"ffe2e7e2ae2094dc","toSide":"top","label":"aggregation of"},
+		{"id":"fe2b2da47d72e07d","fromNode":"4e340af0bef40c0a","fromSide":"bottom","toNode":"a8a30e31ab80c8fe","toSide":"right","label":"polls and monitors"},
+		{"id":"60812bb81567b284","fromNode":"622bb18180f95397","fromSide":"bottom","toNode":"a8a30e31ab80c8fe","toSide":"top","label":"keeps track of"},
+		{"id":"a24c968906689b67","fromNode":"622bb18180f95397","fromSide":"right","toNode":"4e340af0bef40c0a","toSide":"left","label":"uses"},
+		{"id":"1102bea62ec55216","fromNode":"622bb18180f95397","fromSide":"left","toNode":"c04c35841adb2287","toSide":"right"},
+		{"id":"e6bdd597e0acd58e","fromNode":"ffe2e7e2ae2094dc","fromSide":"right","toNode":"e90696cc7021ffcd","toSide":"right"},
+		{"id":"5ff993594ed1a4d3","fromNode":"a8a30e31ab80c8fe","fromSide":"right","toNode":"d1fee45553fae9da","toSide":"left"},
+		{"id":"9bab04d1dd8c8ccc","fromNode":"04d9a7e1c93f465e","fromSide":"right","toNode":"622bb18180f95397","toSide":"left","label":"registers with"},
+		{"id":"1d8af986f8d6c06e","fromNode":"04d9a7e1c93f465e","fromSide":"bottom","toNode":"ffe2e7e2ae2094dc","toSide":"left","label":"owns"},
+		{"id":"784ae60fcfb73ec9","fromNode":"622bb18180f95397","fromSide":"left","toNode":"04d9a7e1c93f465e","toSide":"top","label":"dispatches"},
+		{"id":"1cc7fff40c2f5c28","fromNode":"04d9a7e1c93f465e","fromSide":"left","toNode":"df25564ee6bc407c","toSide":"right"},
+		{"id":"582f10b5210222d7","fromNode":"4e340af0bef40c0a","fromSide":"right","toNode":"753d96303760215c","toSide":"left"},
+		{"id":"52cbe1b673e6ff86","fromNode":"c04c35841adb2287","fromSide":"left","toNode":"a32b5909f4a34ed2","toSide":"right"}
+	]
+}

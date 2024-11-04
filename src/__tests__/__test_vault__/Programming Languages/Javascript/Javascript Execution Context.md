@@ -1,0 +1,15 @@
+- [[Environment (Semantics)]]
+		- The Lexical Environment holds the mapping between symbol name and address. Each pair or binding is individually stored in an Environment Record ([ECMAScript 2015 Language Specification – ECMA-262 6th Edition](https://262.ecma-international.org/6.0/#sec-lexical-environments))
+			- The engine is free to decide where the address is for (heap or stack), it just has to be in charge of managing it correctly.
+		- Lexical environments link to their outer environment (so that a variable in an inner scope may access variables in the outer scope)\
+		- The global environment is the outermost lexical environment
+	- Realm:
+		- Defines the fresh and isolated set of resources that the program can make use of:
+			- Intrinsic object - essentially standard library code that has not yet been modified.
+			- Global object - all global variables get added to a global object. `window` on browsers, `global` in node. Allows for access to global variables anywhere in the code.
+			- Global Environment
+		- Great for isolating code execution 
+	- Execution Context:
+		- Its EVERYTHING executing code needs to properly run:
+			- So Realm + Environment more or less
+		- Contexts may be suspended and resumed. Hence they also need extra control structures to keep track of where the code is. This means that a realm could have multiple execution contexts.

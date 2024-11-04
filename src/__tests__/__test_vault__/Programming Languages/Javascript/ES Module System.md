@@ -1,0 +1,8 @@
+- How do modules fit into this - [[ES Module]] system:
+		- A Module Execution Context is managed when a module is loaded
+			- Does not live on the stack like the global of function execution contexts
+		- After being loaded, the Module Environment Record (which contains all the binding between export symbols and their values) persists. Furthermore, it is cached so that loading does not need to happen again.
+		- As the program runs, module records accumulate.
+		- Note that because the record persists (as opposed to being reloaded on each import), you can treat the variables exported as singletons
+		- **Evaluation Status**: To help address problems with [[Circular Dependency]]s, the status of a loaded module can be set to 'initializing' if it is still executing. When a dependency reaches a module that is still in the process of being loaded, it can resume executing that module and make more progress ([[Depth First Search]]). Some exported symbols may not be defined yet and so will be `undefined` if accessed to early.
+		- After a symbol has been imported, what you get in the calling module is a **reference** to the exported symbol in the called module's environment record.

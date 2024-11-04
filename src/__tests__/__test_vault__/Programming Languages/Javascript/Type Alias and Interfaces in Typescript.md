@@ -1,0 +1,9 @@
+- Type Alias vs Interfaces in Typescript:
+	- **Type Alias**
+		- Extended through Intersection notation
+		- Can only be declared once
+		- Can be used to specific non-object types, like union of literals
+	- **Interface**
+		- Extended through `extends` notations
+		- Declaring it again will add the new properties to the existing declaration. This is called **declaration merging**
+		- Focused only on specifying the shape of an object type
