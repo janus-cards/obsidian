@@ -8,7 +8,7 @@
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"compile-ts": "tsc -skipLibCheck",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
-		"lint": "eslint main.ts",
+		"lint": "eslint src/main.ts",
 		"debug": "node --inspect-brk esbuild.config.mjs",
 		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
 		"test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
