@@ -17,13 +17,6 @@ export default class JanusIntegration extends Plugin {
 			reconnectDelayMs: 3000,
 		});
 		this.grpcProxy.watchEvents();
-
-		// Test
-		const file = this.app.vault.getAbstractFileByPath("Welcome.md");
-		if (file) {
-			const leaf = this.app.workspace.getLeaf("split");
-			leaf.openFile(file as TFile);
-		}
 	}
 
 	onunload() {
