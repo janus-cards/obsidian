@@ -9,7 +9,10 @@ export default class GrpcServer {
 		this.server = new grpc.Server();
 	}
 
-	addService(service: grpc.ServiceDefinition<unknown>, implementation: any) {
+	addService(
+		service: grpc.ServiceDefinition<unknown>,
+		implementation: grpc.UntypedServiceImplementation
+	) {
 		this.server.addService(service, implementation);
 		this.servicesAdded += 1;
 	}

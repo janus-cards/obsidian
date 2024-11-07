@@ -10,7 +10,10 @@ export type ReceivedEvent = {
 	timestamp: number;
 };
 
-export class ObsidianEventStreamService extends UnimplementedObsidianEventStreamService {
+export class ObsidianEventStreamService
+	extends UnimplementedObsidianEventStreamService
+	implements grpc.UntypedServiceImplementation
+{
 	// The generated proto code has an index signature that prevents us from
 	// adding a private field, so we have to use a different name.
 	#userCallback: (event: ReceivedEvent) => void;

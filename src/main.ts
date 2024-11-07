@@ -1,4 +1,4 @@
-import { Plugin, TFile } from "obsidian";
+import { Plugin } from "obsidian";
 import { EventGrpcProxy } from "./event-snooping/event-grpc-proxy";
 import { ChannelCredentials } from "@grpc/grpc-js";
 

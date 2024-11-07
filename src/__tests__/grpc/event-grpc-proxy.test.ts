@@ -10,7 +10,6 @@ import {
 
 jest.mock("obsidian");
 
-import * as grpc from "@grpc/grpc-js";
 import {
 	ReceivedEvent,
 	ObsidianEventStreamService,

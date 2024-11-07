@@ -169,113 +169,6 @@ export namespace ConnectResponse {
         NOT_READY = 2
     }
 }
-export class HeartbeatRequest extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-        vault_path?: string;
-    }) {
-        super();
-        pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-        if (!Array.isArray(data) && typeof data == "object") {
-            if ("vault_path" in data && data.vault_path != undefined) {
-                this.vault_path = data.vault_path;
-            }
-        }
-    }
-    get vault_path() {
-        return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-    }
-    set vault_path(value: string) {
-        pb_1.Message.setField(this, 1, value);
-    }
-    static fromObject(data: {
-        vault_path?: string;
-    }): HeartbeatRequest {
-        const message = new HeartbeatRequest({});
-        if (data.vault_path != null) {
-            message.vault_path = data.vault_path;
-        }
-        return message;
-    }
-    toObject() {
-        const data: {
-            vault_path?: string;
-        } = {};
-        if (this.vault_path != null) {
-            data.vault_path = this.vault_path;
-        }
-        return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-        const writer = w || new pb_1.BinaryWriter();
-        if (this.vault_path.length)
-            writer.writeString(1, this.vault_path);
-        if (!w)
-            return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): HeartbeatRequest {
-        const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new HeartbeatRequest();
-        while (reader.nextField()) {
-            if (reader.isEndGroup())
-                break;
-            switch (reader.getFieldNumber()) {
-                case 1:
-                    message.vault_path = reader.readString();
-                    break;
-                default: reader.skipField();
-            }
-        }
-        return message;
-    }
-    serializeBinary(): Uint8Array {
-        return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): HeartbeatRequest {
-        return HeartbeatRequest.deserialize(bytes);
-    }
-}
-export class HeartbeatResponse extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {}) {
-        super();
-        pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-        if (!Array.isArray(data) && typeof data == "object") { }
-    }
-    static fromObject(data: {}): HeartbeatResponse {
-        const message = new HeartbeatResponse({});
-        return message;
-    }
-    toObject() {
-        const data: {} = {};
-        return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-        const writer = w || new pb_1.BinaryWriter();
-        if (!w)
-            return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): HeartbeatResponse {
-        const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new HeartbeatResponse();
-        while (reader.nextField()) {
-            if (reader.isEndGroup())
-                break;
-            switch (reader.getFieldNumber()) {
-                default: reader.skipField();
-            }
-        }
-        return message;
-    }
-    serializeBinary(): Uint8Array {
-        return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): HeartbeatResponse {
-        return HeartbeatResponse.deserialize(bytes);
-    }
-}
 interface GrpcUnaryServiceInterface<P, R> {
     (message: P, metadata: grpc_1.Metadata, options: grpc_1.CallOptions, callback: grpc_1.requestCallback<R>): grpc_1.ClientUnaryCall;
     (message: P, metadata: grpc_1.Metadata, callback: grpc_1.requestCallback<R>): grpc_1.ClientUnaryCall;
@@ -304,35 +197,22 @@ export abstract class UnimplementedObsidianConnectService {
     static definition = {
         Connect: {
             path: "/ObsidianConnect/Connect",
-            requestStream: false,
+            requestStream: true,
             responseStream: false,
             requestSerialize: (message: ConnectRequest) => Buffer.from(message.serialize()),
             requestDeserialize: (bytes: Buffer) => ConnectRequest.deserialize(new Uint8Array(bytes)),
             responseSerialize: (message: ConnectResponse) => Buffer.from(message.serialize()),
             responseDeserialize: (bytes: Buffer) => ConnectResponse.deserialize(new Uint8Array(bytes))
-        },
-        Heartbeat: {
-            path: "/ObsidianConnect/Heartbeat",
-            requestStream: true,
-            responseStream: false,
-            requestSerialize: (message: HeartbeatRequest) => Buffer.from(message.serialize()),
-            requestDeserialize: (bytes: Buffer) => HeartbeatRequest.deserialize(new Uint8Array(bytes)),
-            responseSerialize: (message: HeartbeatResponse) => Buffer.from(message.serialize()),
-            responseDeserialize: (bytes: Buffer) => HeartbeatResponse.deserialize(new Uint8Array(bytes))
         }
     };
     [method: string]: grpc_1.UntypedHandleCall;
-    abstract Connect(call: grpc_1.ServerUnaryCall<ConnectRequest, ConnectResponse>, callback: grpc_1.sendUnaryData<ConnectResponse>): void;
-    abstract Heartbeat(call: grpc_1.ServerReadableStream<HeartbeatRequest, HeartbeatResponse>, callback: grpc_1.sendUnaryData<HeartbeatResponse>): void;
+    abstract Connect(call: grpc_1.ServerReadableStream<ConnectRequest, ConnectResponse>, callback: grpc_1.sendUnaryData<ConnectResponse>): void;
 }
 export class ObsidianConnectClient extends grpc_1.makeGenericClientConstructor(UnimplementedObsidianConnectService.definition, "ObsidianConnect", {}) {
     constructor(address: string, credentials: grpc_1.ChannelCredentials, options?: Partial<grpc_1.ChannelOptions>) {
         super(address, credentials, options);
     }
-    Connect: GrpcUnaryServiceInterface<ConnectRequest, ConnectResponse> = (message: ConnectRequest, metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<ConnectResponse>, options?: grpc_1.CallOptions | grpc_1.requestCallback<ConnectResponse>, callback?: grpc_1.requestCallback<ConnectResponse>): grpc_1.ClientUnaryCall => {
-        return super.Connect(message, metadata, options, callback);
-    };
-    Heartbeat: GrpWritableServiceInterface<HeartbeatRequest, HeartbeatResponse> = (metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<HeartbeatResponse>, options?: grpc_1.CallOptions | grpc_1.requestCallback<HeartbeatResponse>, callback?: grpc_1.requestCallback<HeartbeatResponse>): grpc_1.ClientWritableStream<HeartbeatRequest> => {
-        return super.Heartbeat(metadata, options, callback);
+    Connect: GrpWritableServiceInterface<ConnectRequest, ConnectResponse> = (metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<ConnectResponse>, options?: grpc_1.CallOptions | grpc_1.requestCallback<ConnectResponse>, callback?: grpc_1.requestCallback<ConnectResponse>): grpc_1.ClientWritableStream<ConnectRequest> => {
+        return super.Connect(metadata, options, callback);
     };
 }

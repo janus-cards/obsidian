@@ -17,16 +17,9 @@ message ConnectResponse {
   Status status = 1;
 }
 
-message HeartbeatRequest {
-  string vault_path = 1;
-}
-
-message HeartbeatResponse {
-}
 
 // Service for handling connection requests
 service ObsidianConnect {
   // Client sends connect request and receives connection status
-  rpc Connect(ConnectRequest) returns (ConnectResponse) {}
-  rpc Heartbeat(stream HeartbeatRequest) returns (HeartbeatResponse) {}
+  rpc Connect(stream ConnectRequest) returns (ConnectResponse) {}
 }

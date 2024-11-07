@@ -1,4 +1,3 @@
-import { ChannelCredentials, ClientWritableStream } from "@grpc/grpc-js";
 import {
 	CreateEvent,
 	DeleteEvent,
@@ -7,17 +6,11 @@ import {
 	FileOpenEvent,
 	ObsidianEvent,
 	ObsidianEventStreamClient,
+	Empty,
 } from "../proto/obsidian_events";
 import { CamelCase, KebabCase } from "@/include/strings/case-conversion";
-
-import { ConnectivityState } from "@grpc/grpc-js/build/src/connectivity-state";
-
-export type GrpcConfig = {
-	address: string;
-	credentials: ChannelCredentials;
-	verbose: boolean;
-	reconnectDelayMs: number;
-};
+import { GrpcConfig } from "../config";
+import { ReconnectingClientStream } from "../reconnecting-client";
 
 /*
   For all events listened to, forward these on via grpc
@@ -30,29 +23,13 @@ type EventNameToProtoMap = {
 	"file-open": FileOpenEvent;
 };
 
-export type ConnectionState = "Unconnected" | "Connecting" | "Connected";
-
-export class ReconnectingEventStreamClient {
-	private client: ObsidianEventStreamClient;
-	private stream: ClientWritableStream<ObsidianEvent>;
-	private grpcConfig: GrpcConfig;
-
+export class EventStreamClient extends ReconnectingClientStream<
+	ObsidianEventStreamClient,
+	ObsidianEvent,
+	Empty
+> {
 	constructor(grpcConfig: GrpcConfig) {
-		this.grpcConfig = grpcConfig;
-	}
-
-	connect() {
-		this.client = new ObsidianEventStreamClient(
-			this.grpcConfig.address,
-			this.grpcConfig.credentials
-		);
-
-		const handler = (err: Error | null) => {
-			if (err) {
-				this.retryConnect();
-			}
-		};
-		this.stream = this.client.streamEvents(handler.bind(this));
+		super(grpcConfig, ObsidianEventStreamClient, "streamEvents");
 	}
 
 	sendRequest<Name extends EventName>(
@@ -69,38 +46,10 @@ export class ReconnectingEventStreamClient {
 			[protoName]: event,
 		});
 		// Log event
-		if (this.grpcConfig.verbose) {
+		if (this.getConfig().verbose) {
 			console.log("Sending event", obsidianEvent);
 		}
 		// Send request
-		this.stream.write(obsidianEvent);
-	}
-	private retryConnect() {
-		setTimeout(() => {
-			this.connect();
-		}, this.grpcConfig.reconnectDelayMs);
-	}
-
-	close() {
-		if (this.stream) {
-			this.stream.end();
-		}
-		if (this.client) {
-			this.client.close();
-		}
-	}
-
-	// Add getter for connection state
-	getConnectionState(): ConnectionState {
-		switch (this.client.getChannel().getConnectivityState(false)) {
-			case ConnectivityState.IDLE:
-				return "Unconnected";
-			case ConnectivityState.CONNECTING:
-				return "Connecting";
-			case ConnectivityState.READY:
-				return "Connected";
-			default:
-				return "Unconnected";
-		}
+		this.getStream().write(obsidianEvent);
 	}
 }

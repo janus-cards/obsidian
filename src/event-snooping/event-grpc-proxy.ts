@@ -3,9 +3,9 @@ import EventWatcher from "./event-watcher";
 
 import {
 	ConnectionState,
-	GrpcConfig,
-	ReconnectingEventStreamClient,
+	EventStreamClient,
 } from "@/grpc/event-stream/reconnecting-client";
+import { GrpcConfig } from "@/grpc/config";
 import {
 	CreateEvent,
 	DeleteEvent,
@@ -15,11 +15,11 @@ import {
 } from "@/grpc/proto/obsidian_events";
 
 export class EventGrpcProxy extends EventWatcher {
-	private client: ReconnectingEventStreamClient;
+	private client: EventStreamClient;
 
 	constructor(plugin: Plugin, grpcConfig: GrpcConfig) {
 		super(plugin);
-		this.client = new ReconnectingEventStreamClient(grpcConfig);
+		this.client = new EventStreamClient(grpcConfig);
 	}
 
 	connect() {
