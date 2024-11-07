@@ -3,7 +3,7 @@ import {
 	Empty,
 	ObsidianEvent,
 	UnimplementedObsidianEventStreamService,
-} from "./obsidan-events";
+} from "@/grpc/proto/obsidian_events";
 
 export type ReceivedEvent = {
 	event: ObsidianEvent;
@@ -47,33 +47,4 @@ export class ObsidianEventStreamService extends UnimplementedObsidianEventStream
 			console.error("Stream error:", error);
 		});
 	}
-}
-
-export function startServer(
-	port: number,
-	callback: (event: ReceivedEvent) => void
-): Promise<grpc.Server> {
-	const server = new grpc.Server();
-	server.addService(
-		UnimplementedObsidianEventStreamService.definition,
-		new ObsidianEventStreamService(callback)
-	);
-
-	const serverReady = new Promise<grpc.Server>((resolve, reject) => {
-		server.bindAsync(
-			`127.0.0.1:${port}`,
-			grpc.ServerCredentials.createInsecure(),
-			(error, port) => {
-				if (error) {
-					console.error("Failed to bind server:", error);
-					reject();
-				} else {
-					console.log(`Server listening on port ${port}`);
-					resolve(server);
-				}
-			}
-		);
-	});
-
-	return serverReady;
 }

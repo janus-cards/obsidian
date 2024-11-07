@@ -8,7 +8,7 @@ import {
 	FileOpenEvent,
 	ObsidianEventStreamClient,
 	ObsidianEvent,
-} from "@/proto/obsidan-events";
+} from "@/grpc/proto/obsidian_events";
 import { ChannelCredentials, ClientWritableStream } from "@grpc/grpc-js";
 import { ConnectivityState } from "@grpc/grpc-js/build/src/connectivity-state";
 import { CamelCase, KebabCase } from "@/include/strings/case-conversion";

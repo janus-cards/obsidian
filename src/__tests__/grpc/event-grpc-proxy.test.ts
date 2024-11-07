@@ -9,12 +9,15 @@ import {
 } from "@jest/globals";
 
 jest.mock("obsidian");
+
 import * as grpc from "@grpc/grpc-js";
 import {
-	ObsidianEventStreamService,
 	ReceivedEvent,
-	startServer,
-} from "../../proto/grpc-test-server";
+	ObsidianEventStreamService,
+} from "../../grpc/event-stream/service";
+import { UnimplementedObsidianEventStreamService } from "../../grpc/proto/obsidian_events";
+import wait from "../../include/promise";
+import GrpcServer from "../../grpc/server";
 import { EventGrpcProxy } from "../../event-snooping/event-grpc-proxy";
 import { ChannelCredentials } from "@grpc/grpc-js";
 import { Plugin } from "@/__mocks__/obsidian-mock/plugin";
@@ -23,7 +26,7 @@ import getTestApp from "../utilities/get-test-vault";
 import { TFile } from "@/__mocks__/obsidian-mock/files";
 
 describe("gRPC Server Tests", () => {
-	let server: grpc.Server;
+	let server: GrpcServer;
 	let client: EventGrpcProxy;
 	let app: App;
 	let plugin: Plugin;
@@ -32,7 +35,12 @@ describe("gRPC Server Tests", () => {
 	const randomPort = Math.floor(Math.random() * 10000) + 5000;
 
 	beforeAll(async () => {
-		server = await startServer(randomPort, onEvent);
+		server = new GrpcServer();
+		server.addService(
+			UnimplementedObsidianEventStreamService.definition,
+			new ObsidianEventStreamService(onEvent)
+		);
+		server.start(randomPort);
 		app = getTestApp();
 		plugin = new Plugin(app);
 		client = new EventGrpcProxy(plugin, {
@@ -131,65 +139,66 @@ describe("gRPC Server Tests", () => {
 
 describe("EventGrpcProxy Tests", () => {
 	let client: EventGrpcProxy;
-	let server: grpc.Server;
+	let server: GrpcServer;
 	let plugin: Plugin;
+	let port: number;
+	const reconnectDelayMs = 500;
 
-	beforeAll(async () => {
+	const createServer = () => {
+		server = new GrpcServer();
+		server.addService(
+			UnimplementedObsidianEventStreamService.definition,
+			new ObsidianEventStreamService(jest.fn())
+		);
+	};
+
+	beforeEach(async () => {
 		const app = getTestApp();
 		plugin = new Plugin(app);
-	});
 
-	test("should handle connection failure and auto-reconnect", async () => {
-		const reconnectDelayMs = 500;
-		const port = Math.floor(Math.random() * 10000) + 5000;
-
-		// Create client before server exists
+		port = Math.floor(Math.random() * 10000) + 5000;
 		client = new EventGrpcProxy(plugin, {
 			address: `127.0.0.1:${port}`,
 			credentials: ChannelCredentials.createInsecure(),
-			verbose: false,
-			reconnectDelayMs,
+			verbose: true,
+			reconnectDelayMs: 500,
 		});
-		client.watchEvents();
 
+		client.watchEvents();
+	});
+
+	test("should handle connection failure and auto-reconnect", async () => {
 		// Should start in Connecting state
 		expect(client.getConnectionState()).toBe("Connecting");
 
 		// Wait a bit to ensure connection attempt fails
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		await wait(500);
 
 		// Should be in Unconnected state after failure
 		expect(client.getConnectionState()).toBe("Unconnected");
 
 		// Start the server
-		server = await startServer(port, (event) => {
-			console.log("Received event", event);
-		});
+		createServer();
+		server.start(port);
 
 		// Wait for auto-reconnect (should be just over reconnectDelayMs)
-		await new Promise((resolve) =>
-			setTimeout(resolve, reconnectDelayMs + 500)
-		);
+		await wait(reconnectDelayMs + 500);
 
 		// Should now be connected
 		expect(client.getConnectionState()).toBe("Connected");
 
 		// Stop the server and wait for the client to fail reconnecting.
 		server.forceShutdown();
-		await new Promise((resolve) =>
-			setTimeout(resolve, reconnectDelayMs + 500)
-		);
+		await wait(reconnectDelayMs + 500);
 		expect(client.getConnectionState()).toBe("Unconnected");
 
 		// Start the server again
-		server = await startServer(port, (event) => {
-			console.log("Received event", event);
-		});
+		createServer();
+		server.start(port);
 
 		// Wait for auto-reconnect (should be just over reconnectDelayMs)
-		await new Promise((resolve) =>
-			setTimeout(resolve, reconnectDelayMs + 500)
-		);
+		await wait(reconnectDelayMs + 500);
+
 		expect(client.getConnectionState()).toBe("Connected");
 	});
 

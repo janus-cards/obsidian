@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+// Message sent by client to initiate connection
+message ConnectRequest {
+  string vault_path = 1;  // Path to the Obsidian vault
+  string version = 2;     // Client version number
+}
+
+// Response from server indicating connection status
+message ConnectResponse {
+  enum Status {
+    UNKNOWN = 0;     // Default value, should not be used
+    READY = 1;       // Server is ready to accept event stream
+    NOT_READY = 2;   // Server is not ready to accept event stream
+  }
+
+  Status status = 1;
+}
+
+message HeartbeatRequest {
+  string vault_path = 1;
+}
+
+message HeartbeatResponse {
+}
+
+// Service for handling connection requests
+service ObsidianConnect {
+  // Client sends connect request and receives connection status
+  rpc Connect(ConnectRequest) returns (ConnectResponse) {}
+  rpc Heartbeat(stream HeartbeatRequest) returns (HeartbeatResponse) {}
+}
