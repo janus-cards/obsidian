@@ -49,6 +49,7 @@ describe("gRPC Server Tests", () => {
 			verbose: true,
 			reconnectDelayMs: 3000,
 		});
+		client.connect();
 		client.watchEvents();
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	});
@@ -164,6 +165,7 @@ describe("EventGrpcProxy Tests", () => {
 			reconnectDelayMs: 500,
 		});
 
+		client.connect();
 		client.watchEvents();
 	});
 
