@@ -6,15 +6,16 @@ import {
 	beforeAll,
 	beforeEach,
 	afterAll,
+	afterEach,
 } from "@jest/globals";
 
 jest.mock("obsidian");
 
+import { ObsidianEventStreamService } from "../../grpc/event-stream/service";
 import {
-	ReceivedEvent,
-	ObsidianEventStreamService,
-} from "../../grpc/event-stream/service";
-import { UnimplementedObsidianEventStreamService } from "../../grpc/proto/obsidian_events";
+	ObsidianEvent,
+	UnimplementedObsidianEventStreamService,
+} from "../../grpc/proto/obsidian_events";
 import wait from "../../include/promise";
 import GrpcServer from "../../grpc/server";
 import { EventGrpcProxy } from "../../event-snooping/event-grpc-proxy";
@@ -29,12 +30,13 @@ describe("gRPC Server Tests", () => {
 	let client: EventGrpcProxy;
 	let app: App;
 	let plugin: Plugin;
-	const onEvent = jest.fn<(event: ReceivedEvent) => void>();
+	const onEvent = jest.fn<(event: ObsidianEvent) => void>();
 
 	const randomPort = Math.floor(Math.random() * 10000) + 5000;
 
-	beforeAll(async () => {
+	beforeEach(async () => {
 		server = new GrpcServer();
+		onEvent.mockClear();
 		server.addService(
 			UnimplementedObsidianEventStreamService.definition,
 			new ObsidianEventStreamService(onEvent)
@@ -49,16 +51,13 @@ describe("gRPC Server Tests", () => {
 			reconnectDelayMs: 3000,
 		});
 		client.connect();
-		client.watchEvents();
+		client.startWatching();
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	});
 
-	beforeEach(() => {
-		onEvent.mockClear();
-	});
-
-	afterAll(async () => {
+	afterEach(async () => {
 		client.close();
+		server.forceShutdown();
 	});
 
 	test("should handle file creation events", async () => {
@@ -66,10 +65,10 @@ describe("gRPC Server Tests", () => {
 		const content = "You can use 3 xors to swap to variables";
 		await app.vault.create(path, content);
 		// Wait 1 second for the event to be sent
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		await wait(1000);
 		expect(onEvent.mock.calls.length).toEqual(1);
-		expect(onEvent.mock.calls[0][0].event.event).toEqual("create");
-		expect(onEvent.mock.calls[0][0].event.create.filePath).toEqual(path);
+		expect(onEvent.mock.calls[0][0].event).toEqual("create");
+		expect(onEvent.mock.calls[0][0].create.filePath).toEqual(path);
 	});
 
 	test("should handle file modification events", async () => {
@@ -78,13 +77,11 @@ describe("gRPC Server Tests", () => {
 		await app.vault.modify(path, "Updated content");
 
 		// Wait for the event to be sent
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		await wait(1000);
 
 		expect(onEvent.mock.calls.length).toEqual(1);
-		expect(onEvent.mock.calls[0][0].event.event).toEqual("modify");
-		expect(onEvent.mock.calls[0][0].event.modify.filePath).toEqual(
-			path.path
-		);
+		expect(onEvent.mock.calls[0][0].event).toEqual("modify");
+		expect(onEvent.mock.calls[0][0].modify.filePath).toEqual(path.path);
 	});
 
 	test("should handle file rename events", async () => {
@@ -95,30 +92,26 @@ describe("gRPC Server Tests", () => {
 		await app.vault.rename(oldPath, newPath);
 
 		// Wait for the event to be sent
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		await wait(1000);
 
 		expect(onEvent.mock.calls.length).toEqual(1);
-		expect(onEvent.mock.calls[0][0].event.event).toEqual("rename");
-		expect(onEvent.mock.calls[0][0].event.rename.oldPath).toEqual(
-			oldPath.path
-		);
-		expect(onEvent.mock.calls[0][0].event.rename.newPath).toEqual(newPath);
+		expect(onEvent.mock.calls[0][0].event).toEqual("rename");
+		expect(onEvent.mock.calls[0][0].rename.oldPath).toEqual(oldPath.path);
+		expect(onEvent.mock.calls[0][0].rename.newPath).toEqual(newPath);
 	});
 
 	test("should handle file deletion events", async () => {
-		const file = new TFile("Algorithms MOC/Bit Manipulation.md");
+		const file = new TFile("Algorithms MOC/Bit Manipulation Tricks.md");
 
 		// Delete the file
 		await app.vault.delete(file);
 
 		// Wait for the event to be sent
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		await wait(1000);
 
 		expect(onEvent.mock.calls.length).toEqual(1);
-		expect(onEvent.mock.calls[0][0].event.event).toEqual("delete");
-		expect(onEvent.mock.calls[0][0].event.delete.filePath).toEqual(
-			file.path
-		);
+		expect(onEvent.mock.calls[0][0].event).toEqual("delete");
+		expect(onEvent.mock.calls[0][0].delete.filePath).toEqual(file.path);
 		expect(await app.vault.exists(file.path)).toEqual(false);
 	});
 
@@ -127,13 +120,12 @@ describe("gRPC Server Tests", () => {
 		app.workspace.getLeaf("split", "left").openFile(file);
 
 		// Wait for the event to be sent
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		await wait(1000);
 
 		expect(onEvent.mock.calls.length).toEqual(1);
-		const protoEvent = onEvent.mock.calls[0][0].event;
-		const protoName = protoEvent.event;
-		expect(protoName).toEqual("fileOpen");
-		expect(protoEvent[protoName].filePath).toEqual(file.path);
+		const protoEvent = onEvent.mock.calls[0][0];
+		expect(protoEvent.event).toEqual("fileOpen");
+		expect(protoEvent.fileOpen.filePath).toEqual(file.path);
 	});
 });
 
@@ -165,7 +157,7 @@ describe("EventGrpcProxy Tests", () => {
 		});
 
 		client.connect();
-		client.watchEvents();
+		client.startWatching();
 	});
 
 	test("should handle connection failure and auto-reconnect", async () => {

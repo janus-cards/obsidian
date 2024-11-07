@@ -4,14 +4,9 @@ import {
 	ClientWritableStream,
 } from "@grpc/grpc-js";
 import { GrpcConfig } from "./config";
-import { Client, UnaryCallback } from "@grpc/grpc-js/build/src/client";
+import { Client } from "@grpc/grpc-js/build/src/client";
 import { ConnectivityState } from "@grpc/grpc-js/build/src/connectivity-state";
-import { FilterValuePredicate, RemoveIndex } from "@/include/type-utils";
-import {
-	Empty,
-	ObsidianEvent,
-	ObsidianEventStreamClient,
-} from "./proto/obsidian_events";
+import { StreamCreator, StreamKeys } from "./types";
 
 type ClientConstructor<T> = new (
 	address: string,
@@ -20,27 +15,6 @@ type ClientConstructor<T> = new (
 ) => T;
 
 type StreamResponseHandler<T> = (response: T) => void;
-
-type StreamCreator<StreamRequestType, StreamResponseType> = (
-	callback: UnaryCallback<StreamResponseType>
-) => ClientWritableStream<StreamRequestType>;
-
-//
-type FilterStreamCreatorKeys<
-	ClientType,
-	StreamRequestType,
-	StreamResponseType
-> = FilterValuePredicate<
-	ClientType,
-	StreamCreator<StreamRequestType, StreamResponseType>
->;
-
-type StreamKeys<ClientType, StreamRequestType, StreamResponseType> =
-	keyof FilterStreamCreatorKeys<
-		RemoveIndex<ClientType>,
-		StreamRequestType,
-		StreamResponseType
-	>;
 
 export type ConnectionState = "Unconnected" | "Connecting" | "Connected";
 
@@ -53,6 +27,7 @@ export class ReconnectingClientStream<
 	private config: GrpcConfig;
 	private stream: ClientWritableStream<StreamRequestType>;
 	private responseHandler: StreamResponseHandler<StreamResponseType> | null;
+	private onDisconnect: () => void;
 	private streamKey: StreamKeys<
 		ClientType,
 		StreamRequestType,
@@ -75,7 +50,7 @@ export class ReconnectingClientStream<
 			response: StreamResponseType
 		) => {
 			if (err) {
-				this.retryConnect();
+				this.disconnectAndReconnect();
 			}
 			if (this.responseHandler) {
 				this.responseHandler(response);
@@ -89,7 +64,10 @@ export class ReconnectingClientStream<
 		this.stream = streamCreator(reconnectHandler.bind(this));
 	}
 
-	retryConnect() {
+	disconnectAndReconnect() {
+		if (this.onDisconnect) {
+			this.onDisconnect();
+		}
 		setTimeout(() => {
 			this.connect();
 		}, this.config.reconnectDelayMs);
@@ -129,5 +107,9 @@ export class ReconnectingClientStream<
 		responseHandler: StreamResponseHandler<StreamResponseType>
 	) {
 		this.responseHandler = responseHandler;
+	}
+
+	setOnDisconnect(onDisconnect: () => void) {
+		this.onDisconnect = onDisconnect;
 	}
 }

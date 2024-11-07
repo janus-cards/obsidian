@@ -37,7 +37,7 @@ export default abstract class EventWatcher {
 		};
 	}
 
-	public watchEvents() {
+	public startWatching() {
 		const overloads = this.getOverloads();
 		for (const eventName in overloads) {
 			const eventType = eventName as EventName;

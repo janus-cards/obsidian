@@ -1,10 +1,7 @@
 import { Plugin, TAbstractFile } from "obsidian";
 import EventWatcher from "./event-watcher";
 
-import {
-	ConnectionState,
-	EventStreamClient,
-} from "@/grpc/event-stream/reconnecting-client";
+import { EventStreamClient } from "@/grpc/event-stream/client";
 import { GrpcConfig } from "@/grpc/config";
 import {
 	CreateEvent,
@@ -13,6 +10,7 @@ import {
 	ModifyEvent,
 	FileOpenEvent,
 } from "@/grpc/proto/obsidian_events";
+import { ConnectionState } from "@/grpc/reconnecting-client";
 
 export class EventGrpcProxy extends EventWatcher {
 	private client: EventStreamClient;
@@ -32,6 +30,10 @@ export class EventGrpcProxy extends EventWatcher {
 
 	getConnectionState(): ConnectionState {
 		return this.client.getConnectionState();
+	}
+
+	setOnDisconnect(onDisconnect: () => void) {
+		this.client.setOnDisconnect(onDisconnect);
 	}
 
 	protected onCreate(file: TAbstractFile): void {

@@ -1,26 +1,24 @@
 import { Plugin } from "obsidian";
-import { EventGrpcProxy } from "./event-snooping/event-grpc-proxy";
-import { ChannelCredentials } from "@grpc/grpc-js";
+import { FeedManager } from "./connect-and-send";
+import { ConnectRequest } from "./grpc/proto/obsidian_connect";
 
 export default class JanusIntegration extends Plugin {
-	private grpcProxy: EventGrpcProxy;
-
+	private feedManager: FeedManager;
 	async onload() {
 		await this.loadSettings();
 
+		const request = new ConnectRequest({
+			vault_path: this.app.vault.getRoot().path,
+			version: "0.0",
+		});
 		// TODO: Manage lifetime better.
 		// What if it doesn't connect?
-		this.grpcProxy = new EventGrpcProxy(this, {
-			address: "localhost:50051",
-			credentials: ChannelCredentials.createInsecure(),
-			verbose: true,
-			reconnectDelayMs: 3000,
-		});
-		this.grpcProxy.watchEvents();
+		this.feedManager = new FeedManager(this, request, 50051, 50052);
+		this.feedManager.start();
 	}
 
 	onunload() {
-		this.grpcProxy.close();
+		this.feedManager.stop();
 	}
 
 	async loadSettings() {}

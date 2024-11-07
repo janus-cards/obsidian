@@ -195,8 +195,8 @@ interface GrpcPromiseServiceInterface<P, R> {
 }
 export abstract class UnimplementedObsidianConnectService {
     static definition = {
-        Connect: {
-            path: "/ObsidianConnect/Connect",
+        connect: {
+            path: "/ObsidianConnect/connect",
             requestStream: true,
             responseStream: false,
             requestSerialize: (message: ConnectRequest) => Buffer.from(message.serialize()),
@@ -206,13 +206,13 @@ export abstract class UnimplementedObsidianConnectService {
         }
     };
     [method: string]: grpc_1.UntypedHandleCall;
-    abstract Connect(call: grpc_1.ServerReadableStream<ConnectRequest, ConnectResponse>, callback: grpc_1.sendUnaryData<ConnectResponse>): void;
+    abstract connect(call: grpc_1.ServerReadableStream<ConnectRequest, ConnectResponse>, callback: grpc_1.sendUnaryData<ConnectResponse>): void;
 }
 export class ObsidianConnectClient extends grpc_1.makeGenericClientConstructor(UnimplementedObsidianConnectService.definition, "ObsidianConnect", {}) {
     constructor(address: string, credentials: grpc_1.ChannelCredentials, options?: Partial<grpc_1.ChannelOptions>) {
         super(address, credentials, options);
     }
-    Connect: GrpWritableServiceInterface<ConnectRequest, ConnectResponse> = (metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<ConnectResponse>, options?: grpc_1.CallOptions | grpc_1.requestCallback<ConnectResponse>, callback?: grpc_1.requestCallback<ConnectResponse>): grpc_1.ClientWritableStream<ConnectRequest> => {
-        return super.Connect(metadata, options, callback);
+    connect: GrpWritableServiceInterface<ConnectRequest, ConnectResponse> = (metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<ConnectResponse>, options?: grpc_1.CallOptions | grpc_1.requestCallback<ConnectResponse>, callback?: grpc_1.requestCallback<ConnectResponse>): grpc_1.ClientWritableStream<ConnectRequest> => {
+        return super.connect(metadata, options, callback);
     };
 }
