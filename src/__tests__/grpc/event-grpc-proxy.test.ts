@@ -56,7 +56,7 @@ describe("gRPC Server Tests", () => {
 	});
 
 	afterEach(async () => {
-		client.close();
+		client.stop();
 		server.forceShutdown();
 	});
 

@@ -1,4 +1,5 @@
 import * as grpc from "@grpc/grpc-js";
+import { StreamKeysOfService } from "./types";
 
 export class BasicStreamService<RequestType, ResponseType> {
 	// The generated proto code has an index signature that prevents us from
@@ -16,7 +17,6 @@ export class BasicStreamService<RequestType, ResponseType> {
 		call.on("data", (request: RequestType) => {
 			try {
 				const response = this.userCallback(request);
-				console.log("Received request:", request);
 				callback(null, response);
 			} catch (error) {
 				console.error("Error processing request:", error);
@@ -24,4 +24,35 @@ export class BasicStreamService<RequestType, ResponseType> {
 			}
 		});
 	}
+}
+
+type ServiceConstructor<RequestType, ResponseType> = new (
+	callback: (request: RequestType) => ResponseType
+) => grpc.UntypedServiceImplementation;
+
+export function makeService<
+	UnimplementedServiceType,
+	RequestType,
+	ResponseType
+>(
+	streamHandlerKey: StreamKeysOfService<
+		UnimplementedServiceType,
+		RequestType,
+		ResponseType
+	>
+): ServiceConstructor<RequestType, ResponseType> {
+	// Define the constructor type
+	class ServiceImplementation {
+		private service: BasicStreamService<RequestType, ResponseType>;
+		[name: string]: any;
+
+		constructor(c: (request: RequestType) => ResponseType) {
+			this.service = new BasicStreamService(c);
+			this[streamHandlerKey] = this.service.streamHandler.bind(
+				this.service
+			);
+		}
+	}
+
+	return ServiceImplementation;
 }
