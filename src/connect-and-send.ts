@@ -4,6 +4,14 @@ import { ConnectClient } from "./grpc/connect/client";
 import { ChannelCredentials } from "@grpc/grpc-js";
 import { ConnectRequest, ConnectResponse } from "./grpc/proto/obsidian_connect";
 
+/*
+States:
+- AWAITING_CONNECTION: Sends connect requests
+- CONNECTED: Sends events
+
+Transitioning from AWAITING_CONNECTION to CONNECTED turns on event client,
+and transitioning from CONNECTED to AWAITING_CONNECTION turns off event client.
+*/
 export class FeedManager {
 	private connectClient: ConnectClient;
 	private eventClient: EventGrpcProxy;
@@ -21,7 +29,7 @@ export class FeedManager {
 		const createConfig = (port: number) => ({
 			address: `localhost:${port}`,
 			credentials: ChannelCredentials.createInsecure(),
-			verbose: true,
+			verbose: false,
 			reconnectDelayMs: this.pollIntervalMs,
 		});
 
@@ -31,6 +39,7 @@ export class FeedManager {
 			createConfig(connectPort),
 			this.onConnect.bind(this)
 		);
+		this.connectClient.connect();
 		this.eventClient = new EventGrpcProxy(plugin, createConfig(eventPort));
 		this.eventClient.startWatching();
 		this.eventClient.setOnDisconnect(this.onDisconnect.bind(this));
@@ -42,8 +51,8 @@ export class FeedManager {
 
 	stop() {
 		this.stopping = true;
-		this.connectClient.close();
-		this.eventClient.close();
+		this.connectClient.stop();
+		this.eventClient.stop();
 	}
 
 	private onConnect(response: ConnectResponse): void {
@@ -54,7 +63,7 @@ export class FeedManager {
 	}
 
 	private onDisconnect() {
-		this.eventClient.close();
+		this.eventClient.stop();
 		if (!this.stopping) {
 			this.startSendingConnect();
 		}

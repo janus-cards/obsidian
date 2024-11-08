@@ -24,8 +24,8 @@ export class EventGrpcProxy extends EventWatcher {
 		this.client.connect();
 	}
 
-	close() {
-		this.client.close();
+	stop() {
+		this.client.stop();
 	}
 
 	getConnectionState(): ConnectionState {

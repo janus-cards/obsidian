@@ -20,6 +20,10 @@ export class ConnectClient extends ReconnectingClientStream<
 	}
 
 	sendRequest(request: ConnectRequest): void {
-		this.getStream().write(request);
+		if (this.getStream()) {
+			this.getStream().write(request);
+		} else {
+			throw new Error("No stream to send request");
+		}
 	}
 }

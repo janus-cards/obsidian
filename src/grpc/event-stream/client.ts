@@ -32,10 +32,15 @@ export class EventStreamClient extends ReconnectingClientStream<
 		super(grpcConfig, ObsidianEventStreamClient, "streamEvents");
 	}
 
+	// Does nothing if the stream is not connected
 	sendRequest<Name extends EventName>(
 		name: Name,
 		event: EventNameToProtoMap[Name]
 	): void {
+		const stream = this.getStream();
+		if (!stream) {
+			return;
+		}
 		// Get timestamp
 		const timestamp = Date.now();
 		// Create request
@@ -50,6 +55,6 @@ export class EventStreamClient extends ReconnectingClientStream<
 			console.log("Sending event", obsidianEvent);
 		}
 		// Send request
-		this.getStream().write(obsidianEvent);
+		stream.write(obsidianEvent);
 	}
 }

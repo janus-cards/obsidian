@@ -24,7 +24,7 @@ describe("when we create an event watcher", () => {
 		app = getTestApp();
 		plugin = new Plugin(app);
 		watcher = new EventSpyer(plugin);
-		watcher.watchEvents();
+		watcher.startWatching();
 	});
 
 	test("should see all the events on vault open", async () => {

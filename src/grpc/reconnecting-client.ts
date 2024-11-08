@@ -25,7 +25,8 @@ export class ReconnectingClientStream<
 > {
 	private client: ClientType;
 	private config: GrpcConfig;
-	private stream: ClientWritableStream<StreamRequestType>;
+	private stream: ClientWritableStream<StreamRequestType> | null = null;
+	private pauseReconnect = false;
 	private responseHandler: StreamResponseHandler<StreamResponseType> | null;
 	private onDisconnect: () => void;
 	private streamKey: StreamKeys<
@@ -45,14 +46,15 @@ export class ReconnectingClientStream<
 	}
 
 	connect() {
+		this.pauseReconnect = false;
 		const reconnectHandler = (
 			err: Error | null,
 			response: StreamResponseType
 		) => {
 			if (err) {
-				this.disconnectAndReconnect();
-			}
-			if (this.responseHandler) {
+				// console.log("Stream error", err);
+				this.fastReconnect();
+			} else if (this.responseHandler) {
 				this.responseHandler(response);
 			}
 		};
@@ -64,16 +66,28 @@ export class ReconnectingClientStream<
 		this.stream = streamCreator(reconnectHandler.bind(this));
 	}
 
-	disconnectAndReconnect() {
+	fastReconnect() {
+		// Disconnect
 		if (this.onDisconnect) {
+			this.stream = null;
 			this.onDisconnect();
 		}
+		// Schedule reconnect
 		setTimeout(() => {
-			this.connect();
+			if (!this.pauseReconnect) {
+				this.connect();
+			}
 		}, this.config.reconnectDelayMs);
 	}
 
-	close() {
+	disconnect() {
+		if (this.stream) {
+			this.stream.end();
+		}
+	}
+
+	stop() {
+		this.pauseReconnect = true;
 		if (this.stream) {
 			this.stream.end();
 		}
@@ -96,7 +110,7 @@ export class ReconnectingClientStream<
 		}
 	}
 
-	protected getStream(): ClientWritableStream<StreamRequestType> {
+	protected getStream(): ClientWritableStream<StreamRequestType> | null {
 		return this.stream;
 	}
 	protected getConfig(): GrpcConfig {
@@ -111,5 +125,9 @@ export class ReconnectingClientStream<
 
 	setOnDisconnect(onDisconnect: () => void) {
 		this.onDisconnect = onDisconnect;
+	}
+
+	pause() {
+		this.pauseReconnect = true;
 	}
 }
