@@ -9,7 +9,7 @@ import {
 
 jest.mock("obsidian");
 
-import getTestApp from "./utilities/get-test-vault";
+import getTestApp from "../../__tests__/utilities/get-test-vault";
 import { App } from "obsidian-mock";
 import { EventSpyer } from "@/event-snooping/event-spyer";
 import { Plugin } from "@/__mocks__/obsidian-mock/plugin";

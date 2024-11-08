@@ -16,13 +16,14 @@ import {
 } from "../../proto/obsidian_connect";
 import { ObsidianConnectService } from "../service";
 import wait from "../../../include/promise";
+import { randomPort } from "../../../include/random";
 
 describe("ConnectClient Tests", () => {
 	let server: GrpcServer;
 	let client: ConnectClient;
 	const onConnect = jest.fn<(request: ConnectRequest) => ConnectResponse>();
 	const onConnectResponse = jest.fn();
-	const port = Math.floor(Math.random() * 10000) + 5000;
+	const port = randomPort();
 
 	const createServer = () => {
 		server = new GrpcServer();
@@ -36,22 +37,18 @@ describe("ConnectClient Tests", () => {
 	beforeEach(async () => {
 		createServer();
 
-		client = new ConnectClient(
-			{
-				address: `127.0.0.1:${port}`,
-				credentials: ChannelCredentials.createInsecure(),
-				verbose: true,
-				reconnectDelayMs: 500,
-			},
-			onConnectResponse
-		);
+		client = new ConnectClient({
+			address: `127.0.0.1:${port}`,
+			credentials: ChannelCredentials.createInsecure(),
+			verbose: true,
+			reconnectDelayMs: 500,
+		});
 
-		client.connect();
 		await wait(1000);
 	});
 
 	afterEach(() => {
-		client.stop();
+		client.close();
 		server.forceShutdown();
 	});
 
@@ -61,46 +58,10 @@ describe("ConnectClient Tests", () => {
 			version: "1.0.0",
 		});
 
-		client.sendRequest(request);
+		client.connect(request, onConnectResponse);
 
 		await wait(500);
 
 		expect(onConnect).toHaveBeenCalled();
-	});
-
-	test("should handle connection failure and auto-reconnect", async () => {
-		// Initial state should be Connected after beforeEach
-		expect(client.getConnectionState()).toBe("Connected");
-
-		// Force shutdown server
-		server.forceShutdown();
-		await wait(1000);
-
-		// Should be Unconnected after server shutdown
-		expect(client.getConnectionState()).toBe("Unconnected");
-
-		// Restart server
-		createServer();
-		// Wait for auto-reconnect
-		await wait(1000);
-
-		// Should be Connected again
-		expect(client.getConnectionState()).toBe("Connected");
-	});
-
-	test("should not reconnect if client is paused", async () => {
-		client.pause();
-		expect(client.getConnectionState()).toBe("Connected");
-		server.forceShutdown();
-		await wait(1000);
-		expect(client.getConnectionState()).toBe("Unconnected");
-
-		createServer();
-		await wait(1000);
-		expect(client.getConnectionState()).toBe("Unconnected");
-
-		client.connect();
-		await wait(1000);
-		expect(client.getConnectionState()).toBe("Connected");
 	});
 });

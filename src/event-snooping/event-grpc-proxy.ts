@@ -15,25 +15,17 @@ import { ConnectionState } from "@/grpc/reconnecting-client";
 export class EventGrpcProxy extends EventWatcher {
 	private client: EventStreamClient;
 
-	constructor(plugin: Plugin, grpcConfig: GrpcConfig) {
+	constructor(
+		plugin: Plugin,
+		grpcConfig: GrpcConfig,
+		onError?: (err: Error) => void
+	) {
 		super(plugin);
-		this.client = new EventStreamClient(grpcConfig);
-	}
-
-	connect() {
-		this.client.connect();
+		this.client = new EventStreamClient(grpcConfig, onError);
 	}
 
 	stop() {
-		this.client.stop();
-	}
-
-	getConnectionState(): ConnectionState {
-		return this.client.getConnectionState();
-	}
-
-	setOnDisconnect(onDisconnect: () => void) {
-		this.client.setOnDisconnect(onDisconnect);
+		this.client.close();
 	}
 
 	protected onCreate(file: TAbstractFile): void {

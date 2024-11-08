@@ -1,29 +1,8 @@
 import { GrpcConfig } from "../config";
-import {
-	ConnectRequest,
-	ConnectResponse,
-	ObsidianConnectClient,
-} from "../proto/obsidian_connect";
-import { ReconnectingClientStream } from "../reconnecting-client";
+import { ObsidianConnectClient } from "../proto/obsidian_connect";
 
-export class ConnectClient extends ReconnectingClientStream<
-	ObsidianConnectClient,
-	ConnectRequest,
-	ConnectResponse
-> {
-	constructor(
-		config: GrpcConfig,
-		onConnectResponse: (response: ConnectResponse) => void
-	) {
-		super(config, ObsidianConnectClient, "connect");
-		this.setResponseHandler(onConnectResponse);
-	}
-
-	sendRequest(request: ConnectRequest): void {
-		if (this.getStream()) {
-			this.getStream().write(request);
-		} else {
-			throw new Error("No stream to send request");
-		}
+export class ConnectClient extends ObsidianConnectClient {
+	constructor(config: GrpcConfig) {
+		super(config.address, config.credentials);
 	}
 }
