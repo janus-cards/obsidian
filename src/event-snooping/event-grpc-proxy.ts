@@ -1,7 +1,10 @@
 import { Plugin, TAbstractFile } from "obsidian";
 import EventWatcher from "./event-watcher";
 
-import { EventStreamClient } from "@/grpc/event-stream/client";
+import {
+	EventNameToProtoMap,
+	EventStreamClient,
+} from "@/grpc/event-stream/client";
 import { GrpcConfig } from "@/grpc/config";
 import {
 	CreateEvent,
@@ -10,10 +13,10 @@ import {
 	ModifyEvent,
 	FileOpenEvent,
 } from "@/grpc/proto/obsidian_events";
-import { ConnectionState } from "@/grpc/reconnecting-client";
 
 export class EventGrpcProxy extends EventWatcher {
 	private client: EventStreamClient;
+	private paused = false;
 
 	constructor(
 		plugin: Plugin,
@@ -24,18 +27,35 @@ export class EventGrpcProxy extends EventWatcher {
 		this.client = new EventStreamClient(grpcConfig, onError);
 	}
 
-	stop() {
+	pause() {
+		this.paused = true;
+	}
+
+	resume() {
+		this.paused = false;
+	}
+
+	close() {
 		this.client.close();
+	}
+
+	private sendEvent<Name extends EventName>(
+		name: Name,
+		event: EventNameToProtoMap[Name]
+	) {
+		if (!this.paused) {
+			this.client.sendRequest(name, event);
+		}
 	}
 
 	protected onCreate(file: TAbstractFile): void {
 		const event = new CreateEvent({ filePath: file.path });
-		this.client.sendRequest("create", event);
+		this.sendEvent("create", event);
 	}
 
 	protected onDelete(file: TAbstractFile): void {
 		const event = new DeleteEvent({ filePath: file.path });
-		this.client.sendRequest("delete", event);
+		this.sendEvent("delete", event);
 	}
 
 	protected onRename(file: TAbstractFile, oldPath: string): void {
@@ -43,12 +63,12 @@ export class EventGrpcProxy extends EventWatcher {
 			newPath: file.path,
 			oldPath,
 		});
-		this.client.sendRequest("rename", event);
+		this.sendEvent("rename", event);
 	}
 
 	protected onModify(file: TAbstractFile): void {
 		const event = new ModifyEvent({ filePath: file.path });
-		this.client.sendRequest("modify", event);
+		this.sendEvent("modify", event);
 	}
 
 	protected onFileOpen(file: TAbstractFile | null): void {
@@ -56,7 +76,7 @@ export class EventGrpcProxy extends EventWatcher {
 		// I believe null file means it has been closed but not sure.
 		if (file) {
 			const event = new FileOpenEvent({ filePath: file.path });
-			this.client.sendRequest("file-open", event);
+			this.sendEvent("file-open", event);
 		}
 	}
 }

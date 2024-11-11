@@ -16,7 +16,7 @@ import { ConnectivityState } from "@grpc/grpc-js/build/src/connectivity-state";
 /*
   For all events listened to, forward these on via grpc
 */
-type EventNameToProtoMap = {
+export type EventNameToProtoMap = {
 	create: CreateEvent;
 	delete: DeleteEvent;
 	rename: RenameEvent;
@@ -29,6 +29,7 @@ export class EventStreamClient {
 	private verbose = false;
 	private stream: ClientWritableStream<ObsidianEvent> | null = null;
 	private onError?: (err: Error) => void;
+
 	constructor(grpcConfig: GrpcConfig, onError?: (err: Error) => void) {
 		this.onError = onError;
 		this.client = new ObsidianEventStreamClient(
@@ -94,6 +95,7 @@ export class EventStreamClient {
 		};
 		this.stream = this.client.streamEvents(wrappedCallback.bind(this));
 	}
+
 	close() {
 		this.stream?.end();
 		this.client.close();

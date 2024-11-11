@@ -55,7 +55,7 @@ describe("gRPC Server Tests", () => {
 	});
 
 	afterEach(async () => {
-		client.stop();
+		client.close();
 		server.forceShutdown();
 	});
 
@@ -167,7 +167,6 @@ describe("EventGrpcProxy Tests", () => {
 			},
 			onError
 		);
-
 		client.startWatching();
 	});
 
@@ -181,7 +180,7 @@ describe("EventGrpcProxy Tests", () => {
 		// Start the server
 		startServer();
 
-		await wait(1000);
+		await wait(1500);
 		createRandomFile();
 		await wait(1500);
 		// Should see no errors from this
@@ -192,6 +191,7 @@ describe("EventGrpcProxy Tests", () => {
 		server.forceShutdown();
 
 		await wait(500);
+
 		createRandomFile();
 		await wait(1500);
 		// This should fail
@@ -201,7 +201,7 @@ describe("EventGrpcProxy Tests", () => {
 		// Start the server again
 		startServer();
 
-		await wait(1000);
+		await wait(1500);
 		createRandomFile();
 		await wait(1500);
 

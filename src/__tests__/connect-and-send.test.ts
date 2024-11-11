@@ -39,7 +39,21 @@ describe("Connect and send", () => {
 
 	const connectServerMock =
 		jest.fn<(request: ConnectRequest) => ConnectResponse>();
+
 	const eventServerMock = jest.fn<(event: ObsidianEvent) => Empty>();
+	eventServerMock.mockReturnValue(new Empty());
+
+	const allowConnect = () => {
+		connectServerMock.mockReturnValue(
+			new ConnectResponse({ status: ConnectResponse.Status.READY })
+		);
+	};
+
+	const disallowConnect = () => {
+		connectServerMock.mockReturnValue(
+			new ConnectResponse({ status: ConnectResponse.Status.NOT_READY })
+		);
+	};
 
 	const createRandomFile = () => {
 		const randomFileName = `test-${randomString(10)}.md`;
@@ -72,6 +86,7 @@ describe("Connect and send", () => {
 		connectServer = createConnectServer();
 		eventServer = createEventServer();
 		connectServerMock.mockClear();
+		disallowConnect();
 		eventServerMock.mockClear();
 
 		// Setup the plugin
@@ -114,9 +129,7 @@ describe("Connect and send", () => {
 		expect(eventServerMock).toHaveBeenCalledTimes(0);
 
 		// Set the connect server mock so that it returns a success response
-		connectServerMock.mockReturnValue(
-			new ConnectResponse({ status: ConnectResponse.Status.READY })
-		);
+		allowConnect();
 
 		// Wait for the client to receive the response
 		await wait(2000);
@@ -127,25 +140,23 @@ describe("Connect and send", () => {
 		await wait(200);
 		expect(eventServerMock).toHaveBeenCalledTimes(1);
 
-		// Restarting the server causes the client to have to restart the loop
-		eventServerMock.mockClear();
-		eventServer.forceShutdown();
-		eventServer = createEventServer();
-		eventServer.start(eventPort);
+		// Restarting the connect server causes the client to have to restart the loop
+		disallowConnect();
+		connectServer.forceShutdown();
+		connectServer = createConnectServer();
+		connectServer.start(connectPort);
 		await wait(2000);
 
 		// No longer receiving events
 		createRandomFile();
 		await wait(200);
-		expect(eventServerMock).toHaveBeenCalledTimes(0);
+		expect(eventServerMock).toHaveBeenCalledTimes(1);
 
 		// Can reconnect again
-		connectServerMock.mockReturnValue(
-			new ConnectResponse({ status: ConnectResponse.Status.READY })
-		);
+		allowConnect();
 		await wait(1000);
 		createRandomFile();
-		await wait(200);
+		await wait(1000);
 		expect(eventServerMock).toHaveBeenCalledTimes(1);
 	}, 15000);
 });

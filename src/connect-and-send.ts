@@ -5,17 +5,12 @@ import { ChannelCredentials } from "@grpc/grpc-js";
 import { ConnectRequest, ConnectResponse } from "./grpc/proto/obsidian_connect";
 
 /*
-States:
-- AWAITING_CONNECTION: Sends connect requests
-- CONNECTED: Sends events
-
-Transitioning from AWAITING_CONNECTION to CONNECTED turns on event client,
-and transitioning from CONNECTED to AWAITING_CONNECTION turns off event client.
+Constantly asks the server if it can send events. If it receives a NOT_READY response or an error, it does not stream events.
+If it receives a READY response, it streams events.
 */
 export class FeedManager {
 	private connectClient: ConnectClient;
 	private eventClient: EventGrpcProxy;
-	private shouldSendConnect = true;
 	private pollIntervalMs = 1000;
 	private request: ConnectRequest;
 	private stopping = false;
@@ -35,52 +30,49 @@ export class FeedManager {
 
 		this.request = request;
 
-		this.connectClient = new ConnectClient(
-			createConfig(connectPort),
-			this.onConnect.bind(this)
-		);
-		this.connectClient.connect();
+		this.connectClient = new ConnectClient(createConfig(connectPort));
 		this.eventClient = new EventGrpcProxy(plugin, createConfig(eventPort));
+		this.eventClient.pause();
 		this.eventClient.startWatching();
-		this.eventClient.setOnDisconnect(this.onDisconnect.bind(this));
 	}
 
 	start() {
-		this.startSendingConnect();
+		this.sendLoop();
 	}
 
 	stop() {
 		this.stopping = true;
-		this.connectClient.stop();
-		this.eventClient.stop();
+		this.connectClient.close();
+		this.eventClient.close();
 	}
 
-	private onConnect(response: ConnectResponse): void {
+	private onConnectResponse(
+		err: Error | null,
+		response: ConnectResponse
+	): void {
+		if (err) {
+			console.error("Error in connect response", err);
+			this.eventClient.pause();
+			return;
+		}
 		if (response.status === ConnectResponse.Status.READY) {
-			this.eventClient.connect();
-			this.shouldSendConnect = false;
+			this.eventClient.resume();
+		} else if (response.status === ConnectResponse.Status.NOT_READY) {
+			this.eventClient.pause();
 		}
-	}
-
-	private onDisconnect() {
-		this.eventClient.stop();
-		if (!this.stopping) {
-			this.startSendingConnect();
-		}
-	}
-
-	private startSendingConnect() {
-		this.shouldSendConnect = true;
-		this.sendLoop();
 	}
 
 	private sendLoop() {
-		if (this.shouldSendConnect) {
-			this.connectClient.sendRequest(this.request);
-
-			new Promise((resolve) => {
-				setTimeout(resolve, this.pollIntervalMs);
-			}).then(() => this.sendLoop());
+		if (this.stopping) {
+			return;
 		}
+		this.connectClient.connect(
+			this.request,
+			this.onConnectResponse.bind(this)
+		);
+
+		new Promise((resolve) => {
+			setTimeout(resolve, this.pollIntervalMs);
+		}).then(() => this.sendLoop());
 	}
 }
