@@ -56,8 +56,10 @@ export class FeedManager {
 			return;
 		}
 		if (response.status === ConnectResponse.Status.READY) {
+			console.log("Ready to send events");
 			this.eventClient.resume();
 		} else if (response.status === ConnectResponse.Status.NOT_READY) {
+			console.log("Not ready to send events");
 			this.eventClient.pause();
 		}
 	}
