@@ -1,11 +1,11 @@
 import { Plugin, TAbstractFile } from "obsidian";
-import EventWatcher from "./event-watcher";
 
+
+import { GrpcConfig } from "@/grpc/config";
 import {
 	EventNameToProtoMap,
 	EventStreamClient,
 } from "@/grpc/event-stream/client";
-import { GrpcConfig } from "@/grpc/config";
 import {
 	CreateEvent,
 	DeleteEvent,
@@ -14,6 +14,8 @@ import {
 	FileOpenEvent,
 } from "@/grpc/proto/obsidian_events";
 
+import EventWatcher from "./event-watcher";
+
 export class EventGrpcProxy extends EventWatcher {
 	private client: EventStreamClient;
 	private paused = false;
@@ -21,28 +23,28 @@ export class EventGrpcProxy extends EventWatcher {
 	constructor(
 		plugin: Plugin,
 		grpcConfig: GrpcConfig,
-		onError?: (err: Error) => void
+		onError?: (err: Error) => void,
 	) {
 		super(plugin);
 		this.client = new EventStreamClient(grpcConfig, onError);
 	}
 
-	pause() {
+	pause(): void {
 		this.paused = true;
 	}
 
-	resume() {
+	resume(): void {
 		this.paused = false;
 	}
 
-	close() {
+	close(): void {
 		this.client.close();
 	}
 
 	private sendEvent<Name extends EventName>(
 		name: Name,
-		event: EventNameToProtoMap[Name]
-	) {
+		event: EventNameToProtoMap[Name],
+	): void {
 		if (!this.paused) {
 			this.client.sendRequest(name, event);
 		}

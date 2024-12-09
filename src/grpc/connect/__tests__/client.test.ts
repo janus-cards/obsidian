@@ -1,3 +1,4 @@
+import { ChannelCredentials } from "@grpc/grpc-js";
 import {
 	describe,
 	expect,
@@ -6,17 +7,17 @@ import {
 	beforeEach,
 	afterEach,
 } from "@jest/globals";
-import { ChannelCredentials } from "@grpc/grpc-js";
-import { ConnectClient } from "../client";
-import GrpcServer from "../../server";
+
+import wait from "../../../include/promise";
+import { randomPort } from "../../../include/random";
 import {
 	ConnectRequest,
 	ConnectResponse,
 	UnimplementedObsidianConnectService,
 } from "../../proto/obsidian_connect";
+import GrpcServer from "../../server";
+import { ConnectClient } from "../client";
 import { ObsidianConnectService } from "../service";
-import wait from "../../../include/promise";
-import { randomPort } from "../../../include/random";
 
 describe("ConnectClient Tests", () => {
 	let server: GrpcServer;
@@ -25,11 +26,11 @@ describe("ConnectClient Tests", () => {
 	const onConnectResponse = jest.fn();
 	const port = randomPort();
 
-	const createServer = () => {
+	const createServer = (): void => {
 		server = new GrpcServer();
 		server.addService(
 			UnimplementedObsidianConnectService.definition,
-			new ObsidianConnectService(onConnect)
+			new ObsidianConnectService(onConnect),
 		);
 		server.start(port);
 	};

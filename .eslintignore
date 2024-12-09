@@ -3,3 +3,6 @@ node_modules/
 main.js
 
 src/grpc/proto/*
+
+**/__tests__/**
+**/__mocks__/**

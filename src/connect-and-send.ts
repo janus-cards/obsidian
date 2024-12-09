@@ -1,7 +1,9 @@
-import { Plugin } from "obsidian";
-import { EventGrpcProxy } from "./event-snooping/event-grpc-proxy";
-import { ConnectClient } from "./grpc/connect/client";
 import { ChannelCredentials } from "@grpc/grpc-js";
+import { Plugin } from "obsidian";
+
+import { EventGrpcProxy } from "./event-snooping/event-grpc-proxy";
+import { GrpcConfig } from "./grpc/config";
+import { ConnectClient } from "./grpc/connect/client";
 import { ConnectRequest, ConnectResponse } from "./grpc/proto/obsidian_connect";
 
 /*
@@ -19,9 +21,9 @@ export class FeedManager {
 		plugin: Plugin,
 		request: ConnectRequest,
 		connectPort: number,
-		eventPort: number
+		eventPort: number,
 	) {
-		const createConfig = (port: number) => ({
+		const createConfig = (port: number): GrpcConfig => ({
 			address: `localhost:${port}`,
 			credentials: ChannelCredentials.createInsecure(),
 			verbose: false,
@@ -36,11 +38,11 @@ export class FeedManager {
 		this.eventClient.startWatching();
 	}
 
-	start() {
+	start(): void {
 		this.sendLoop();
 	}
 
-	stop() {
+	stop(): void {
 		this.stopping = true;
 		this.connectClient.close();
 		this.eventClient.close();
@@ -48,7 +50,7 @@ export class FeedManager {
 
 	private onConnectResponse(
 		err: Error | null,
-		response: ConnectResponse
+		response: ConnectResponse,
 	): void {
 		if (err) {
 			console.error("Error in connect response", err);
@@ -64,13 +66,13 @@ export class FeedManager {
 		}
 	}
 
-	private sendLoop() {
+	private sendLoop(): void {
 		if (this.stopping) {
 			return;
 		}
 		this.connectClient.connect(
 			this.request,
-			this.onConnectResponse.bind(this)
+			this.onConnectResponse.bind(this),
 		);
 
 		new Promise((resolve) => {

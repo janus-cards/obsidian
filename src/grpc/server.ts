@@ -11,8 +11,8 @@ export default class GrpcServer {
 
 	addService(
 		service: grpc.ServiceDefinition<unknown>,
-		implementation: grpc.UntypedServiceImplementation
-	) {
+		implementation: grpc.UntypedServiceImplementation,
+	): void {
 		this.server.addService(service, implementation);
 		this.servicesAdded += 1;
 	}
@@ -22,7 +22,7 @@ export default class GrpcServer {
 			if (this.servicesAdded === 0) {
 				reject(new Error("No services added to the server"));
 			}
-			this.server!.bindAsync(
+			this.server.bindAsync(
 				`127.0.0.1:${port}`,
 				grpc.ServerCredentials.createInsecure(),
 				(error) => {
@@ -33,12 +33,12 @@ export default class GrpcServer {
 						console.log(`Server listening on port ${port}`);
 						resolve();
 					}
-				}
+				},
 			);
 		});
 	}
 
-	forceShutdown() {
+	forceShutdown(): void {
 		this.server.forceShutdown();
 	}
 }

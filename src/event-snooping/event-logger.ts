@@ -1,4 +1,5 @@
 import { TAbstractFile } from "obsidian";
+
 import EventWatcher from "./event-watcher";
 
 export default class EventLogger extends EventWatcher {

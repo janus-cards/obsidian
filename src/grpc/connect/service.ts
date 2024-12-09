@@ -1,13 +1,14 @@
 import {
-	ConnectResponse,
-	ConnectRequest,
-	UnimplementedObsidianConnectService,
-} from "@/grpc/proto/obsidian_connect";
-import {
 	sendUnaryData,
 	ServerUnaryCall,
 	UntypedServiceImplementation,
 } from "@grpc/grpc-js";
+
+import {
+	ConnectResponse,
+	ConnectRequest,
+	UnimplementedObsidianConnectService,
+} from "@/grpc/proto/obsidian_connect";
 
 export class ObsidianConnectService
 	extends UnimplementedObsidianConnectService

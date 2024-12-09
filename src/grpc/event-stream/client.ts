@@ -1,3 +1,9 @@
+import { ClientWritableStream } from "@grpc/grpc-js";
+import { ConnectivityState } from "@grpc/grpc-js/build/src/connectivity-state";
+
+import { CamelCase, KebabCase } from "@/include/strings/case-conversion";
+
+import { GrpcConfig } from "../config";
 import {
 	CreateEvent,
 	DeleteEvent,
@@ -6,12 +12,7 @@ import {
 	FileOpenEvent,
 	ObsidianEvent,
 	ObsidianEventStreamClient,
-	Empty,
 } from "../proto/obsidian_events";
-import { CamelCase, KebabCase } from "@/include/strings/case-conversion";
-import { GrpcConfig } from "../config";
-import { ClientWritableStream } from "@grpc/grpc-js";
-import { ConnectivityState } from "@grpc/grpc-js/build/src/connectivity-state";
 
 /*
   For all events listened to, forward these on via grpc
@@ -34,16 +35,16 @@ export class EventStreamClient {
 		this.onError = onError;
 		this.client = new ObsidianEventStreamClient(
 			grpcConfig.address,
-			grpcConfig.credentials
+			grpcConfig.credentials,
 		);
 	}
 
 	// Does nothing if the stream is not connected
 	sendRequest<Name extends EventName>(
 		name: Name,
-		event: EventNameToProtoMap[Name]
+		event: EventNameToProtoMap[Name],
 	): void {
-		const sendRequestOnStream = () => {
+		const sendRequestOnStream = (): void => {
 			if (!this.stream) {
 				throw new Error("Stream must be setup before sending requests");
 			}
@@ -85,8 +86,8 @@ export class EventStreamClient {
 			});
 		}
 	}
-	private setupStream() {
-		const wrappedCallback = (err: Error | null, response: Empty) => {
+	private setupStream(): void {
+		const wrappedCallback = (err: Error | null): void => {
 			if (err) {
 				console.error("Error in event stream callback", err);
 				this.onError?.(err);
@@ -96,7 +97,7 @@ export class EventStreamClient {
 		this.stream = this.client.streamEvents(wrappedCallback.bind(this));
 	}
 
-	close() {
+	close(): void {
 		this.stream?.end();
 		this.client.close();
 	}

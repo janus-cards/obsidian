@@ -1,13 +1,14 @@
 import {
-	Empty,
-	ObsidianEvent,
-	UnimplementedObsidianEventStreamService,
-} from "@/grpc/proto/obsidian_events";
-import {
 	sendUnaryData,
 	ServerReadableStream,
 	UntypedServiceImplementation,
 } from "@grpc/grpc-js";
+
+import {
+	Empty,
+	ObsidianEvent,
+	UnimplementedObsidianEventStreamService,
+} from "@/grpc/proto/obsidian_events";
 
 export class ObsidianEventStreamService
 	extends UnimplementedObsidianEventStreamService

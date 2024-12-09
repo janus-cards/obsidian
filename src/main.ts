@@ -1,13 +1,15 @@
 import { Plugin } from "obsidian";
+
 import { FeedManager } from "./connect-and-send";
 import { ConnectRequest } from "./grpc/proto/obsidian_connect";
 
 export default class JanusIntegration extends Plugin {
 	private feedManager: FeedManager;
-	async onload() {
-		await this.loadSettings();
+	async onload(): Promise<void> {
+		// await this.loadSettings();
 
 		const request = new ConnectRequest({
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			vault_path: this.app.vault.adapter.basePath,
 			version: "0.0",
@@ -19,11 +21,7 @@ export default class JanusIntegration extends Plugin {
 		this.feedManager.start();
 	}
 
-	onunload() {
+	onunload(): void {
 		this.feedManager.stop();
 	}
-
-	async loadSettings() {}
-
-	async saveSettings() {}
 }
