@@ -56,7 +56,8 @@
 		"eqeqeq": [
 			"error",
 			"always"
-		]
+		],
+		"no-restricted-syntax": "off"
 	},
 	"settings": {
 		"import/resolver": {
