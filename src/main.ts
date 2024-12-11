@@ -34,3 +34,5 @@ export default class JanusIntegration extends Plugin {
 
 	async saveSettings() {}
 }
+
+// Added comment for verification
