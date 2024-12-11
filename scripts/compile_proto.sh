@@ -7,6 +7,7 @@ export TSPROTOC=node_modules/.bin/protoc-gen-ts
 export JSPROTOC=node_modules/.bin/protoc-gen-js
 
 export PROTO_DIR=proto
+export SRC_DIR=src/grpc
 
 check_requirements() {
 	if ! command -v protoc &>/dev/null; then
@@ -47,10 +48,10 @@ PROTO_FILES=$(find $PROTO_DIR -name "*.proto")
 
 # Typescript Protos
 echo "Compiling Typescript Protos..."
-protoc --plugin=protoc-gen-ts=$TSPROTOC --ts_out=src $PROTO_FILES
+protoc --plugin=protoc-gen-ts=$TSPROTOC --ts_out=${SRC_DIR} $PROTO_FILES
 # TS complains that the generated files use custom namespaces instead of modules.
 # To resolve, I have disabled all eslint rules for the generated files.
 
 # Javascript Protos
 echo "Compiling Javascript Protos..."
-protoc --plugin=protoc-gen-js=$JSPROTOC --js_out=import_style=commonjs,binary:src $PROTO_FILES
+protoc --plugin=protoc-gen-js=$JSPROTOC --js_out=import_style=commonjs,binary:${SRC_DIR} $PROTO_FILES

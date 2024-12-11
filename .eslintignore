@@ -2,4 +2,7 @@ node_modules/
 
 main.js
 
-src/proto/*
+src/grpc/proto/*
+
+**/__tests__/**
+**/__mocks__/**

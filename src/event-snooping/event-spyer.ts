@@ -1,6 +1,7 @@
 import { jest } from "@jest/globals";
-import EventWatcher from "./event-watcher";
 import { Plugin, TAbstractFile } from "obsidian";
+
+import EventWatcher from "./event-watcher";
 
 export class EventSpyer extends EventWatcher {
 	constructor(plugin: Plugin) {

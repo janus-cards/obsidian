@@ -1,4 +1,4 @@
-// source: proto/obsidan-events.proto
+// source: proto/obsidian_events.proto
 /**
  * @fileoverview
  * @enhanceable

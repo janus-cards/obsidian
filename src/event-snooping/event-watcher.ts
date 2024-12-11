@@ -37,7 +37,7 @@ export default abstract class EventWatcher {
 		};
 	}
 
-	public watchEvents() {
+	public startWatching(): void {
 		const overloads = this.getOverloads();
 		for (const eventName in overloads) {
 			const eventType = eventName as EventName;
@@ -47,7 +47,7 @@ export default abstract class EventWatcher {
 
 	private registerEvent<E extends EventName>(
 		eventType: E,
-		callback: EventCallback[E]
+		callback: EventCallback[E],
 	): void {
 		const eventRef = this.eventCreationOverloads[eventType](callback);
 		this.plugin.registerEvent(eventRef);

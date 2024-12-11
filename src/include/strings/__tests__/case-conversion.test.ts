@@ -1,9 +1,6 @@
-import {
-	UnstyledSymbol,
-	CamelCase,
-	KebabCase,
-} from "@/include/strings/case-conversion";
 import { describe, it, expect } from "@jest/globals";
+
+import { UnstyledSymbol, CamelCase, KebabCase } from "../case-conversion";
 
 describe("UnstyledSymbol", () => {
 	it("should store terms array", () => {
