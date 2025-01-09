@@ -1,6 +1,6 @@
 {
 	"name": "janus-integration",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Obsidian Connector for Janus",
 	"main": "main.js",
 	"scripts": {
