@@ -2,11 +2,16 @@ import { Plugin } from "obsidian";
 
 import { FeedManager } from "./connect-and-send";
 import { ConnectRequest } from "./grpc/proto/obsidian_connect";
+import { DEFAULT_SETTINGS, Settings } from "./settings/settings";
+import { SettingTab } from "./settings/settings-tab";
 
 export default class JanusIntegration extends Plugin {
 	private feedManager: FeedManager;
+	settings: Settings;
 	async onload(): Promise<void> {
-		// await this.loadSettings();
+		await this.loadSettings();
+
+		this.addSettingTab(new SettingTab(this.app, this));
 
 		const request = new ConnectRequest({
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -23,5 +28,17 @@ export default class JanusIntegration extends Plugin {
 
 	onunload(): void {
 		this.feedManager.stop();
+	}
+
+	async loadSettings(): Promise<void> {
+		this.settings = Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			await this.loadData(),
+		);
+	}
+
+	async saveSettings(): Promise<void> {
+		await this.saveData(this.settings);
 	}
 }
