@@ -45,13 +45,13 @@ describe("Connect and send", () => {
 
 	const allowConnect = () => {
 		connectServerMock.mockReturnValue(
-			new ConnectResponse({ status: ConnectResponse.Status.READY })
+			new ConnectResponse({ status: ConnectResponse.Status.READY }),
 		);
 	};
 
 	const disallowConnect = () => {
 		connectServerMock.mockReturnValue(
-			new ConnectResponse({ status: ConnectResponse.Status.NOT_READY })
+			new ConnectResponse({ status: ConnectResponse.Status.NOT_READY }),
 		);
 	};
 
@@ -65,7 +65,7 @@ describe("Connect and send", () => {
 		const server = new GrpcServer();
 		server.addService(
 			UnimplementedObsidianConnectService.definition,
-			new ObsidianConnectService(connectServerMock)
+			new ObsidianConnectService(connectServerMock),
 		);
 		return server;
 	};
@@ -74,7 +74,7 @@ describe("Connect and send", () => {
 		const server = new GrpcServer();
 		server.addService(
 			UnimplementedObsidianEventStreamService.definition,
-			new ObsidianEventStreamService(eventServerMock)
+			new ObsidianEventStreamService(eventServerMock),
 		);
 		return server;
 	};
