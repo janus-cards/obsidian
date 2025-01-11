@@ -2,6 +2,7 @@ import { Plugin } from "obsidian";
 
 import { FeedManager } from "./connect-and-send";
 import { ConnectRequest } from "./grpc/proto/obsidian_connect";
+import PrivacyFilterer from "./privacy-filterer";
 import { DEFAULT_SETTINGS, Settings } from "./settings/settings";
 import { SettingTab } from "./settings/settings-tab";
 
@@ -19,9 +20,13 @@ export default class JanusIntegration extends Plugin {
 			vault_path: this.app.vault.adapter.basePath,
 			version: "0.0",
 		});
+
+		const privacyFilterer = new PrivacyFilterer(this);
+		const filter = privacyFilterer.shouldSend.bind(privacyFilterer);
+
 		// TODO: Manage lifetime better.
 		// What if it doesn't connect?
-		this.feedManager = new FeedManager(this, request, 50051, 50052);
+		this.feedManager = new FeedManager(this, request, 50051, 50052, filter);
 		console.log("Starting feed manager");
 		this.feedManager.start();
 	}

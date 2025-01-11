@@ -22,6 +22,7 @@ export class FeedManager {
 		request: ConnectRequest,
 		connectPort: number,
 		eventPort: number,
+		fileFilter?: (file: TFile) => boolean,
 	) {
 		const createConfig = (port: number): GrpcConfig => ({
 			address: `localhost:${port}`,
@@ -33,7 +34,11 @@ export class FeedManager {
 		this.request = request;
 
 		this.connectClient = new ConnectClient(createConfig(connectPort));
-		this.eventClient = new EventGrpcProxy(plugin, createConfig(eventPort));
+		this.eventClient = new EventGrpcProxy(
+			plugin,
+			createConfig(eventPort),
+			fileFilter,
+		);
 		this.eventClient.pause();
 		this.eventClient.startWatching();
 	}
