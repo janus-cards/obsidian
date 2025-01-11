@@ -1,5 +1,5 @@
 import { ChannelCredentials } from "@grpc/grpc-js";
-import { Plugin } from "obsidian";
+import { Plugin, TAbstractFile } from "obsidian";
 
 import { EventGrpcProxy } from "./event-snooping/event-grpc-proxy";
 import { GrpcConfig } from "./grpc/config";
@@ -22,7 +22,7 @@ export class FeedManager {
 		request: ConnectRequest,
 		connectPort: number,
 		eventPort: number,
-		fileFilter?: (file: TFile) => boolean,
+		fileFilter?: (file: TAbstractFile) => boolean,
 	) {
 		const createConfig = (port: number): GrpcConfig => ({
 			address: `localhost:${port}`,
