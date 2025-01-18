@@ -46,6 +46,11 @@ export default class PastSessionsManager {
 	}
 
 	saveSessions(): void {
+		const sessionPath = this.requireSessionPath();
+		// If folder doesn't exist, create it
+		if (!fs.existsSync(path.dirname(sessionPath))) {
+			fs.mkdirSync(path.dirname(sessionPath), { recursive: true });
+		}
 		fs.writeFileSync(
 			this.requireSessionPath(),
 			JSON.stringify(this.sessions, null, 2),

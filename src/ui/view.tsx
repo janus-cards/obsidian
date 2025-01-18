@@ -2,6 +2,7 @@ import React from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import CurrentSession from "./current";
+import PastSessions from "./past";
 
 export default function JanusView() {
 	return (
@@ -15,7 +16,7 @@ export default function JanusView() {
 					<CurrentSession />
 				</TabsContent>
 				<TabsContent value="history">
-					Change your password here.
+					<PastSessions />
 				</TabsContent>
 			</Tabs>
 		</div>

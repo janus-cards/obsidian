@@ -1,10 +1,9 @@
-import { useMemo } from "react";
-
 import { useCurrentSession } from "@/state/current-session";
 import { getSessionManager } from "@/state/session-manager";
 
+import FileTreeEditor from "../components/file-tree-editor";
+import { RenameHeader } from "../components/rename-header";
 import { Button } from "../components/ui/button";
-import FileTreeEditor from "../file-tree-editor";
 
 export default function CurrentSession() {
 	const { session } = useCurrentSession();
@@ -18,7 +17,14 @@ export default function CurrentSession() {
 
 	const onSave = () => {
 		const manager = getSessionManager();
-		manager.current().finish();
+		const session = manager.current().finish();
+		manager.past().add(session);
+	};
+
+	const onSetName = (name: string) => {
+		const manager = getSessionManager();
+		manager.current().setName(name);
+		console.log("setName", name);
 	};
 
 	const onReset = () => {
@@ -30,7 +36,7 @@ export default function CurrentSession() {
 
 	return (
 		<div>
-			<h1>Current Session</h1>
+			<RenameHeader value={session.info.name} onSetName={onSetName} />
 			<div className="flex flex-row gap-2">
 				<Button onClick={onSave}>Save</Button>
 				<Button onClick={onReset}>Reset</Button>
