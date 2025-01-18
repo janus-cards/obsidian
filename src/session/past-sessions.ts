@@ -1,6 +1,6 @@
+import { EventEmitter } from "events";
 import fs from "fs";
-import { EventEmitter } from "node:events";
-import path from "node:path";
+import path from "path";
 
 export default class PastSessionsManager {
 	private sessions: ObsidianSession[] = [];

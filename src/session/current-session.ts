@@ -1,10 +1,16 @@
+import { randomUUID, UUID } from "crypto";
+import { EventEmitter } from "events";
 import fs from "fs";
-import { EventEmitter } from "node:events";
-import path from "node:path";
+import path from "path";
 
 export default class CurrentSessionManager {
 	private session: ObsidianSession | null = null;
 	private eventEmitter: EventEmitter = new EventEmitter();
+	private vaultFolder: string;
+
+	constructor(vaultFolder: string) {
+		this.vaultFolder = vaultFolder;
+	}
 
 	on(
 		event: "updateCurrentSession",
@@ -13,14 +19,15 @@ export default class CurrentSessionManager {
 		this.eventEmitter.on(event, listener);
 	}
 
-	startSession(vaultFolder: string, id: number): void {
+	startSession(): ObsidianSession {
+		const id = this.generatedId();
 		this.session = {
 			version: 1,
 			id,
 			info: {
 				name: "In Progress",
 				startTimestamp: Date.now(),
-				vaultFolder,
+				vaultFolder: this.vaultFolder,
 			},
 			contents: {
 				startSnapshots: {},
@@ -28,6 +35,7 @@ export default class CurrentSessionManager {
 			},
 		};
 		this.emitUpdateCurrentSession();
+		return this.session;
 	}
 
 	getCurrentSession(): ObsidianSession | null {
@@ -70,7 +78,6 @@ export default class CurrentSessionManager {
 
 	addToSession(viewedFilePath: string, contents?: string): void {
 		const session = this.requireSession();
-		console.log("Adding to session", viewedFilePath);
 		// If this is the first time viewing the file, add it to the start snapshots
 		const startSnapshot = session.contents.startSnapshots[viewedFilePath];
 		if (!startSnapshot) {
@@ -85,6 +92,12 @@ export default class CurrentSessionManager {
 		this.emitUpdateCurrentSession();
 	}
 
+	renameSession(name: string): void {
+		const session = this.requireSession();
+		session.info.name = name;
+		this.emitUpdateCurrentSession();
+	}
+
 	removeFromSession(viewedFilePath: string): void {
 		const session = this.requireSession();
 		console.log("Removing from session", viewedFilePath);
@@ -94,12 +107,17 @@ export default class CurrentSessionManager {
 
 	private requireSession(): ObsidianSession {
 		if (!this.session) {
-			throw new Error("No session started");
+			return this.startSession();
 		}
 		return this.session;
 	}
 
 	private emitUpdateCurrentSession(): void {
 		this.eventEmitter.emit("updateCurrentSession", this.session);
+	}
+
+	private generatedId(): UUID {
+		// RANDOM HASH
+		return randomUUID();
 	}
 }

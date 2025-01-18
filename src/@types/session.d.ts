@@ -1,9 +1,11 @@
+import { UUID } from "crypto";
+
 declare global {
 	export type FileSnapshots = Record<string, string>;
 
 	export type ObsidianSession = {
 		version: 1;
-		id: number;
+		id: UUID;
 		info: {
 			name: string;
 			startTimestamp: number;

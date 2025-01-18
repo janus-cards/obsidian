@@ -8,7 +8,7 @@ export default class PrivacyFilterer {
 		this.plugin = plugin;
 	}
 
-	shouldSend(file: TAbstractFile): boolean {
+	filter(file: TAbstractFile): boolean {
 		if (file instanceof TFile) {
 			return !(
 				this.privateTagInFile(file) ||
