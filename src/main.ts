@@ -9,6 +9,7 @@ import { DEFAULT_SETTINGS, Settings } from "./settings/settings";
 import { SettingTab } from "./settings/settings-tab";
 import { useCurrentSession } from "./state/current-session";
 import { usePastSession } from "./state/past-session";
+import { setSessionManager } from "./state/session-manager";
 import SessionItemView, { VIEW_TYPE_SESSION_VIEWS } from "./ui/view-container";
 
 export default class JanusIntegration extends Plugin {
@@ -24,9 +25,7 @@ export default class JanusIntegration extends Plugin {
 
 		// Wait 1 second
 		// For some reason, activating the view immediately doesn't work
-		this.registerInterval(
-			window.setInterval(() => this.activateView(), 1000),
-		);
+		setTimeout(() => this.activateView(), 1000);
 
 		await this.loadSettings();
 
@@ -36,6 +35,7 @@ export default class JanusIntegration extends Plugin {
 		// @ts-ignore
 		const vaultPath = this.app.vault.adapter.basePath;
 		this.sessionManager = new SessionManager(vaultPath);
+		setSessionManager(this.sessionManager);
 
 		const configDir = path.join(vaultPath, ".janus");
 		this.sessionManager.start(configDir);

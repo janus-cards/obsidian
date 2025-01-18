@@ -1,5 +1,13 @@
+.relative {
+  position: relative
+}
+
 .mt-2 {
   margin-top: 0.5rem
+}
+
+.mt-4 {
+  margin-top: 1rem
 }
 
 .flex {
@@ -10,20 +18,48 @@
   display: inline-flex
 }
 
+.table {
+  display: table
+}
+
 .grid {
   display: grid
+}
+
+.contents {
+  display: contents
+}
+
+.h-10 {
+  height: 2.5rem
+}
+
+.h-4 {
+  height: 1rem
 }
 
 .h-9 {
   height: 2.25rem
 }
 
+.w-4 {
+  width: 1rem
+}
+
 .w-\[400px\] {
   width: 400px
 }
 
+.w-\[50px\] {
+  width: 50px
+}
+
 .w-full {
   width: 100%
+}
+
+.caption-bottom {
+  caption-side: bottom
 }
 
 .grid-cols-2 {
@@ -42,8 +78,16 @@
   justify-content: center
 }
 
+.overflow-auto {
+  overflow: auto
+}
+
 .whitespace-nowrap {
   white-space: nowrap
+}
+
+.rounded-full {
+  border-radius: 9999px
 }
 
 .rounded-lg {
@@ -52,6 +96,14 @@
 
 .rounded-md {
   border-radius: var(--radius-m)
+}
+
+.border-b {
+  border-bottom-width: 1px
+}
+
+.border-t {
+  border-top-width: 1px
 }
 
 .bg-background {
@@ -66,6 +118,15 @@
   padding: 0.25rem
 }
 
+.p-2 {
+  padding: 0.5rem
+}
+
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem
+}
+
 .px-3 {
   padding-left: 0.75rem;
   padding-right: 0.75rem
@@ -74,6 +135,14 @@
 .py-1 {
   padding-top: 0.25rem;
   padding-bottom: 0.25rem
+}
+
+.text-left {
+  text-align: left
+}
+
+.align-middle {
+  vertical-align: middle
 }
 
 .text-sm {
@@ -99,6 +168,12 @@
   transition-duration: 150ms
 }
 
+.transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms
+}
+
 @keyframes enter {
   from {
     opacity: var(--tw-enter-opacity, 1);
@@ -111,6 +186,10 @@
     opacity: var(--tw-exit-opacity, 1);
     transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1)) rotate(var(--tw-exit-rotate, 0))
   }
+}
+
+.hover\:bg-muted:hover {
+  background-color: var(--background-primary)
 }
 
 .focus-visible\:outline-none:focus-visible {
@@ -140,6 +219,10 @@
   background-color: var(--background-primary)
 }
 
+.data-\[state\=selected\]\:bg-muted[data-state="selected"] {
+  background-color: var(--background-primary)
+}
+
 .data-\[state\=active\]\:text-foreground[data-state="active"] {
   color: var(--text-normal)
 }
@@ -148,4 +231,25 @@
   --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}
+
+.\[\&\:has\(\[role\=checkbox\]\)\]\:pr-0:has([role=checkbox]) {
+  padding-right: 0px
+}
+
+.\[\&\>\[role\=checkbox\]\]\:translate-y-\[2px\]>[role=checkbox] {
+  --tw-translate-y: 2px;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+
+.\[\&\>tr\]\:last\:border-b-0:last-child>tr {
+  border-bottom-width: 0px
+}
+
+.\[\&_tr\:last-child\]\:border-0 tr:last-child {
+  border-width: 0px
+}
+
+.\[\&_tr\]\:border-b tr {
+  border-bottom-width: 1px
 }
