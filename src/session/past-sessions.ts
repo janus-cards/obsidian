@@ -37,10 +37,11 @@ export default class PastSessionsManager {
 	}
 
 	loadSessions(): void {
-		if (!fs.existsSync(this.requireSessionPath())) {
+		const sessionPath = this.requireSessionPath();
+		if (!fs.existsSync(sessionPath)) {
 			return;
 		}
-		const sessions = fs.readFileSync(this.requireSessionPath(), "utf8");
+		const sessions = fs.readFileSync(sessionPath, "utf8");
 		this.sessions = JSON.parse(sessions);
 		this.emitUpdatePastSessions();
 	}

@@ -1,14 +1,16 @@
+import { useCallback, useState } from "react";
+
 import { usePastSession } from "@/state/past-session";
 import { getSessionManager } from "@/state/session-manager";
 
+import PastSession from "./session";
 import SessionList from "./session-list";
 
 export default function PastSessions() {
 	const { sessions } = usePastSession();
 
-	const onSelect = (session: ObsidianSession) => {
-		console.log(session);
-	};
+	const [pastSessionInView, setPastSessionInView] =
+		useState<ObsidianSession | null>(null);
 
 	const onDelete = (session: ObsidianSession) => {
 		console.log(session);
@@ -17,14 +19,28 @@ export default function PastSessions() {
 		manager.past().delete(session.id);
 	};
 
+	const goBack = useCallback(() => {
+		setPastSessionInView(null);
+	}, [setPastSessionInView]);
+
 	return (
 		<div>
-			<h1>Past Sessions</h1>
-			<SessionList
-				sessions={sessions}
-				onSelect={onSelect}
-				onDelete={onDelete}
-			/>
+			{pastSessionInView ? (
+				<PastSession
+					session={pastSessionInView}
+					onDelete={onDelete}
+					onGoBack={goBack}
+				/>
+			) : (
+				<>
+					<h1>Past Sessions</h1>
+					<SessionList
+						sessions={sessions}
+						onSelect={setPastSessionInView}
+						onDelete={onDelete}
+					/>
+				</>
+			)}
 		</div>
 	);
 }
