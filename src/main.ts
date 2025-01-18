@@ -39,7 +39,6 @@ export default class JanusIntegration extends Plugin {
 		setSessionManager(this.sessionManager);
 
 		const configDir = path.join(vaultPath, ".janus");
-		this.sessionManager.start(configDir);
 		this.sessionManager.on(
 			"updateCurrentSession",
 			(session: ObsidianSession | null) => {
@@ -54,6 +53,7 @@ export default class JanusIntegration extends Plugin {
 				usePastSession.getState().onUpdate(sessions);
 			},
 		);
+		this.sessionManager.start(configDir);
 
 		const filterer = new PrivacyFilterer(this);
 		const filter = filterer.filter.bind(filterer);

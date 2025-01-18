@@ -1,5 +1,7 @@
+import { Trash2Icon } from "lucide-react";
 import * as React from "react";
 
+import { Button } from "../components/ui/button";
 import {
 	Table,
 	TableBody,
@@ -12,27 +14,20 @@ import {
 export interface SessionListProps {
 	sessions: ObsidianSession[];
 	onSelect: (session: ObsidianSession) => void;
+	onDelete?: (session: ObsidianSession) => void;
 }
 
-export default function SessionList({ sessions, onSelect }: SessionListProps) {
-	const formatDate = (timestamp: number) => {
-		return new Date(timestamp).toLocaleString();
-	};
-
-	const formatDuration = (start: number, end?: number) => {
-		if (!end) return "In Progress";
-		const duration = end - start;
-		const minutes = Math.floor(duration / 1000 / 60);
-		return `${minutes} minutes`;
-	};
-
+export default function SessionList({
+	sessions,
+	onSelect,
+	onDelete,
+}: SessionListProps) {
 	return (
 		<Table>
 			<TableHeader>
 				<TableRow>
+					{onDelete && <TableHead></TableHead>}
 					<TableHead>Name</TableHead>
-					<TableHead>Start Time</TableHead>
-					<TableHead>Duration</TableHead>
 					<TableHead>Files</TableHead>
 				</TableRow>
 			</TableHeader>
@@ -43,16 +38,14 @@ export default function SessionList({ sessions, onSelect }: SessionListProps) {
 						className="cursor-pointer"
 						onClick={() => onSelect(session)}
 					>
+						{onDelete && (
+							<TableCell>
+								<Button onClick={() => onDelete?.(session)}>
+									<Trash2Icon />
+								</Button>
+							</TableCell>
+						)}
 						<TableCell>{session.info.name}</TableCell>
-						<TableCell>
-							{formatDate(session.info.startTimestamp)}
-						</TableCell>
-						<TableCell>
-							{formatDuration(
-								session.info.startTimestamp,
-								session.info.endTimestamp,
-							)}
-						</TableCell>
 						<TableCell>
 							{
 								Object.keys(session.contents.startSnapshots)
