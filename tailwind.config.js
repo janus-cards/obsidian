@@ -23,13 +23,17 @@ module.exports = {
 					foreground: "var(--text-normal)",
 				},
 				muted: {
-					DEFAULT: "var(--background-secondary)",
+					DEFAULT: "var(--background-primary)",
 					foreground: "var(--text-muted)",
 				},
 				accent: {
 					DEFAULT:
 						"hsl(var(--accent-h) var(--accent-s) var(--accent-l))",
 					foreground: "var(--text-on-accent)",
+				},
+				card: {
+					DEFAULT: "var(--background-secondary)",
+					foreground: "var(--text-normal)",
 				},
 			},
 			borderRadius: {
@@ -40,5 +44,5 @@ module.exports = {
 			},
 		},
 	},
-	plugins: [],
+	plugins: [require("tailwindcss-animate")],
 };
