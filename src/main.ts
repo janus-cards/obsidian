@@ -1,4 +1,6 @@
-import { Plugin } from "obsidian";
+import path from "path";
+
+import { Plugin, WorkspaceLeaf } from "obsidian";
 
 import PrivacyFilterer from "./privacy-filterer";
 import SessionAdder from "./session/session-adder";
@@ -6,6 +8,8 @@ import SessionManager from "./session/session-manager";
 import { DEFAULT_SETTINGS, Settings } from "./settings/settings";
 import { SettingTab } from "./settings/settings-tab";
 import { useCurrentSession } from "./state/current-session";
+import { usePastSession } from "./state/past-session";
+import SessionItemView, { VIEW_TYPE_SESSION_VIEWS } from "./ui/view-container";
 
 export default class JanusIntegration extends Plugin {
 	settings: Settings;
@@ -13,22 +17,28 @@ export default class JanusIntegration extends Plugin {
 	sessionAdder: SessionAdder;
 
 	async onload(): Promise<void> {
+		this.registerView(
+			VIEW_TYPE_SESSION_VIEWS,
+			(leaf) => new SessionItemView(leaf),
+		);
+
+		// Wait 1 second
+		// For some reason, activating the view immediately doesn't work
+		this.registerInterval(
+			window.setInterval(() => this.activateView(), 1000),
+		);
+
 		await this.loadSettings();
 
 		this.addSettingTab(new SettingTab(this.app, this));
 
-		/*
-		const request = new ConnectRequest({
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			vault_path: this.app.vault.adapter.basePath,
-			version: "0.0",
-		});
-		*/
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		const vaultPath = this.app.vault.adapter.basePath;
 		this.sessionManager = new SessionManager(vaultPath);
+
+		const configDir = path.join(vaultPath, ".janus");
+		this.sessionManager.start(configDir);
 		this.sessionManager.on(
 			"updateCurrentSession",
 			(session: ObsidianSession | null) => {
@@ -36,6 +46,14 @@ export default class JanusIntegration extends Plugin {
 				useCurrentSession.getState().onUpdate(session);
 			},
 		);
+		this.sessionManager.on(
+			"updatePastSessions",
+			(sessions: ObsidianSession[]) => {
+				console.log("updatePastSessions", sessions);
+				usePastSession.getState().onUpdate(sessions);
+			},
+		);
+
 		const filterer = new PrivacyFilterer(this);
 		const filter = filterer.filter.bind(filterer);
 		this.sessionAdder = new SessionAdder(this, this.sessionManager, filter);
@@ -53,5 +71,30 @@ export default class JanusIntegration extends Plugin {
 
 	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
+	}
+
+	private async activateView() {
+		const { workspace } = this.app;
+
+		let leaf: WorkspaceLeaf | null = null;
+		const leaves = workspace.getLeavesOfType(VIEW_TYPE_SESSION_VIEWS);
+		console.log("leaves", leaves);
+		if (leaves.length > 0) {
+			// A leaf with our view already exists, use that
+			leaf = leaves[0];
+			console.log("Found existing leaf");
+		} else {
+			console.log("Creating new leaf");
+			// Our view could not be found in the workspace, create a new leaf
+			// in the right sidebar for it
+			leaf = workspace.getLeftLeaf(false);
+			await leaf?.setViewState({
+				type: VIEW_TYPE_SESSION_VIEWS,
+				active: true,
+			});
+		}
+
+		// "Reveal" the leaf in case it is in a collapsed sidebar
+		workspace.revealLeaf(leaf!);
 	}
 }

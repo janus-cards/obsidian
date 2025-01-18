@@ -49,8 +49,12 @@ export default abstract class EventWatcher {
 		eventType: E,
 		callback: EventCallback[E],
 	): void {
-		const eventRef = this.eventCreationOverloads[eventType](callback);
-		this.plugin.registerEvent(eventRef);
+		// https://docs.obsidian.md/Plugins/Guides/Optimizing+plugin+load+time#Option%20B.%20Register%20the%20handler%20once%20the%20layout%20is%20ready
+		// This ensures that we don't listen to all the create events on start
+		this.plugin.app.workspace.onLayoutReady(() => {
+			const eventRef = this.eventCreationOverloads[eventType](callback);
+			this.plugin.registerEvent(eventRef);
+		});
 	}
 
 	// Customization points

@@ -1,3 +1,4 @@
+import { UUID } from "crypto";
 import { EventEmitter } from "events";
 import fs from "fs";
 import path from "path";
@@ -19,12 +20,6 @@ export default class PastSessionsManager {
 		this.sessionPath = path.join(sessionDir, this.sessionName);
 	}
 
-	getHighestId(): number {
-		return this.sessions.reduce((max, session) => {
-			return Math.max(max, session.id);
-		}, 0);
-	}
-
 	addSession(session: ObsidianSession): void {
 		this.sessions.push(session);
 		this.saveSessions();
@@ -35,7 +30,7 @@ export default class PastSessionsManager {
 		return this.sessions;
 	}
 
-	deleteSession(id: number): void {
+	deleteSession(id: UUID): void {
 		this.sessions = this.sessions.filter((session) => session.id !== id);
 		this.saveSessions();
 		this.emitUpdatePastSessions();
