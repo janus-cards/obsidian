@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 
+import sendSession from "@/api/send-session";
 import { usePastSession } from "@/state/past-session";
 import { getSessionManager } from "@/state/session-manager";
 
@@ -23,6 +24,12 @@ export default function PastSessions() {
 		setPastSessionInView(null);
 	}, [setPastSessionInView]);
 
+	const onSend = useCallback((session: ObsidianSession) => {
+		sendSession(session).catch((error) => {
+			console.error(error);
+		});
+	}, []);
+
 	return (
 		<div>
 			{pastSessionInView ? (
@@ -38,6 +45,7 @@ export default function PastSessions() {
 						sessions={sessions}
 						onSelect={setPastSessionInView}
 						onDelete={onDelete}
+						onSend={onSend}
 					/>
 				</>
 			)}

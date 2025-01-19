@@ -1,4 +1,4 @@
-import { Trash2Icon } from "lucide-react";
+import { SendIcon, Trash2Icon } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "../components/ui/button";
@@ -14,21 +14,23 @@ import {
 export interface SessionListProps {
 	sessions: ObsidianSession[];
 	onSelect: (session: ObsidianSession) => void;
-	onDelete?: (session: ObsidianSession) => void;
+	onSend: (session: ObsidianSession) => void;
+	onDelete: (session: ObsidianSession) => void;
 }
 
 export default function SessionList({
 	sessions,
 	onSelect,
+	onSend,
 	onDelete,
 }: SessionListProps) {
 	return (
 		<Table>
 			<TableHeader>
 				<TableRow>
-					{onDelete && <TableHead></TableHead>}
 					<TableHead>Name</TableHead>
 					<TableHead>Files</TableHead>
+					<TableHead></TableHead>
 				</TableRow>
 			</TableHeader>
 			<TableBody>
@@ -38,19 +40,30 @@ export default function SessionList({
 						className="cursor-pointer"
 						onClick={() => onSelect(session)}
 					>
-						{onDelete && (
-							<TableCell>
-								<Button onClick={() => onDelete?.(session)}>
-									<Trash2Icon />
-								</Button>
-							</TableCell>
-						)}
 						<TableCell>{session.info.name}</TableCell>
 						<TableCell>
 							{
 								Object.keys(session.contents.startSnapshots)
 									.length
 							}
+						</TableCell>
+						<TableCell>
+							<Button
+								onClick={(e) => {
+									e.stopPropagation();
+									onDelete(session);
+								}}
+							>
+								<Trash2Icon />
+							</Button>
+							<Button
+								onClick={(e) => {
+									e.stopPropagation();
+									onSend(session);
+								}}
+							>
+								<SendIcon />
+							</Button>
 						</TableCell>
 					</TableRow>
 				))}
