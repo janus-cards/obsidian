@@ -1,20 +1,6 @@
 import type { TAbstractFile } from "obsidian";
 
-import {
-	CreateEvent,
-	DeleteEvent,
-	RenameEvent,
-	FileOpenEvent,
-	ModifyEvent,
-} from "@/grpc/proto/obsidian_events";
-
 declare global {
-	type Events =
-		| CreateEvent
-		| DeleteEvent
-		| RenameEvent
-		| ModifyEvent
-		| FileOpenEvent;
 	type EventName = "create" | "delete" | "rename" | "modify" | "file-open";
 	type EventCallback = {
 		create: (file: TAbstractFile) => void;

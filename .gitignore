@@ -24,3 +24,6 @@ data.json
 dist
 
 coverage
+
+# Auto generated styles
+styles.css

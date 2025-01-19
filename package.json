@@ -4,9 +4,11 @@
 	"description": "Obsidian Connector for Janus",
 	"main": "main.js",
 	"scripts": {
-		"dev": "node esbuild.config.mjs",
-		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"dev": "npm run watch-css & node esbuild.config.mjs",
+		"build": "npm run compile-css && tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"compile-ts": "tsc -skipLibCheck",
+		"compile-css": "tailwindcss -i ./src/ui/styles.css -o ./styles.css",
+		"watch-css": "tailwindcss -i ./src/ui/styles.css -o ./styles.css --watch",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"lint": "eslint . --ext .ts",
 		"lint:fix": "eslint . --ext .ts --fix",
@@ -23,6 +25,8 @@
 		"@jest/globals": "^29.7.0",
 		"@types/glob": "^8.1.0",
 		"@types/node": "^16.11.6",
+		"@types/react": "^19.0.7",
+		"@types/react-dom": "^19.0.3",
 		"@typescript-eslint/eslint-plugin": "5.29.0",
 		"@typescript-eslint/parser": "5.29.0",
 		"builtin-modules": "3.3.0",
@@ -37,6 +41,7 @@
 		"prettier": "^3.4.2",
 		"protoc-gen-js": "^3.21.2",
 		"protoc-gen-ts": "^0.8.7",
+		"tailwindcss": "^3.4.17",
 		"ts-jest": "^29.2.5",
 		"tslib": "2.4.0",
 		"typescript": "4.7.4"
@@ -44,7 +49,17 @@
 	"dependencies": {
 		"@grpc/grpc-js": "^1.12.2",
 		"@popperjs/core": "^2.11.8",
+		"@radix-ui/react-slot": "^1.1.1",
+		"@radix-ui/react-tabs": "^1.1.2",
 		"@types/google-protobuf": "^3.15.12",
-		"google-protobuf": "^3.21.4"
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"google-protobuf": "^3.21.4",
+		"lucide-react": "^0.473.0",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"tailwind-merge": "^2.6.0",
+		"tailwindcss-animate": "^1.0.7",
+		"zustand": "^5.0.3"
 	}
 }
