@@ -1,4 +1,3 @@
-import fs from "fs";
 import path from "path";
 
 import { Plugin, WorkspaceLeaf } from "obsidian";
@@ -96,6 +95,8 @@ export default class JanusIntegration extends Plugin {
 		}
 
 		// "Reveal" the leaf in case it is in a collapsed sidebar
-		workspace.revealLeaf(leaf!);
+		if (leaf) {
+			workspace.revealLeaf(leaf);
+		}
 	}
 }
