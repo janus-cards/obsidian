@@ -15,4 +15,8 @@ export class Workspace {
 	getLeaf(type: "split" | "tab", mode: "left" | "right"): WorkspaceLeaf {
 		return new WorkspaceLeaf(this.eventManager);
 	}
+
+	onLayoutReady(callback: () => void): void {
+		callback();
+	}
 }
